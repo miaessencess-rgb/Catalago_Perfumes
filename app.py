@@ -1,9 +1,9 @@
 import os
-from Flask import Flask, render_template_string
+from flask import Flask, render_template_string
 
 app = Flask(__name__)
 
-# Catálogo completo con precios ajustados (Detal, Mayor, Gran Mayor)
+# Catálogo completo con costos de proveedor y esquema de 3 niveles (Detal, Mayor, Gran Mayor)
 CATALOGO = [
     {"marca": "Afnan", "producto": "9PM Elixir", "detal": 20.0, "mayor": 16.5, "gran_mayor": 14.5, "genero": "Hombre", "imagen": "/static/fotos/9pm-elixir.jpg"},
     {"marca": "Afnan", "producto": "9PM Night Out", "detal": 25.0, "mayor": 19.0, "gran_mayor": 16.5, "genero": "Hombre", "imagen": "/static/fotos/9pm-night-out.jpg"},
@@ -22,8 +22,8 @@ CATALOGO = [
     {"marca": "Ariana Grande", "producto": "Mod Vanilla Fem", "detal": 15.0, "mayor": 13.0, "gran_mayor": 11.5, "genero": "Mujer", "imagen": "/static/fotos/mod-vanilla.jpg"},
     {"marca": "Ariana Grande", "producto": "R.E.M. Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer", "imagen": "/static/fotos/rem-fem.jpg"},
     {"marca": "Ariana Grande", "producto": "Thank U Next Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer", "imagen": "/static/fotos/thank-u-next.jpg"},
-    {"marca": "Armaf", "producto": "Silver Infinity", "detal": 35.0, "mayor": 25.0, "gran_mayor": 23.0, "genero": "Hombre", "imagen": "/static/fotos/silver-infinity.jpg"},
-    {"marca": "Armaf", "producto": "Gold Infinity", "detal": 35.0, "mayor": 25.0, "gran_mayor": 23.0, "genero": "Unisex", "imagen": "/static/fotos/gold-infinity.jpg"},
+    {"marca": "Armaf", "producto": "Silver Infinity", "detal": 35.0, "mayor": 28.0, "gran_mayor": 25.0, "genero": "Hombre", "imagen": "/static/fotos/silver-infinity.jpg"},
+    {"marca": "Armaf", "producto": "Gold Infinity", "detal": 35.0, "mayor": 28.0, "gran_mayor": 25.0, "genero": "Unisex", "imagen": "/static/fotos/gold-infinity.jpg"},
     {"marca": "Armaf", "producto": "Club de Nuit Lionheart Woman", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Mujer", "imagen": "/static/fotos/cdn-lionheart-woman.jpg"},
     {"marca": "Armaf", "producto": "Club De Nuit Man Intense 105ml", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre", "imagen": "/static/fotos/cdn-man-intense.jpg"},
     {"marca": "Armaf", "producto": "Club De Nuit Milestone", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Unisex", "imagen": "/static/fotos/cdn-milestone.jpg"},
@@ -31,7 +31,7 @@ CATALOGO = [
     {"marca": "Armaf", "producto": "Odyssey Aqua Edition", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Hombre", "imagen": "/static/fotos/odyssey-aqua.jpg"},
     {"marca": "Armaf", "producto": "Odyssey Mandarin Sky", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Hombre", "imagen": "/static/fotos/odyssey-mandarin-sky.jpg"},
     {"marca": "Armaf", "producto": "Club de Nuit Lionheart Man", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Hombre", "imagen": "/static/fotos/cdn-lionheart-man.jpg"},
-    {"marca": "Armaf", "producto": "Island Lush", "detal": 35.0, "mayor": 25.0, "gran_mayor": 23.0, "genero": "Unisex", "imagen": "/static/fotos/island-lush.jpg"},
+    {"marca": "Armaf", "producto": "Island Lush", "detal": 35.0, "mayor": 28.0, "gran_mayor": 25.0, "genero": "Unisex", "imagen": "/static/fotos/island-lush.jpg"},
     {"marca": "Armaf", "producto": "Odyssey Candyland", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Mujer", "imagen": "/static/fotos/odyssey-candyland.jpg"},
     {"marca": "Armaf", "producto": "Odyssey Homme White Edition", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Hombre", "imagen": "/static/fotos/odyssey-white.jpg"},
     {"marca": "Armaf", "producto": "Odyssey Limoni", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Unisex", "imagen": "/static/fotos/odyssey-limoni.jpg"},
@@ -111,20 +111,20 @@ CATALOGO = [
     {"marca": "Lattafa", "producto": "Yara Candy Fem", "detal": 25.0, "mayor": 21.0, "gran_mayor": 19.5, "genero": "Mujer", "imagen": "/static/fotos/yara-candy.jpg"},
     {"marca": "Lattafa", "producto": "Yara Pink Fem", "detal": 25.0, "mayor": 21.0, "gran_mayor": 19.5, "genero": "Mujer", "imagen": "/static/fotos/yara-pink.jpg"},
     {"marca": "Lattafa", "producto": "Yara X3 30ml Set Lujo", "detal": 22.0, "mayor": 18.5, "gran_mayor": 17.5, "genero": "Mujer", "imagen": "/static/fotos/yara-x3-set.jpg"},
-    {"marca": "Lattafa", "producto": "Yara X4 30ml Set Lujo", "detal": 35.0, "mayor": 25.0, "gran_mayor": 23.0, "genero": "Mujer", "imagen": "/static/fotos/yara-x4-set.jpg"},
+    {"marca": "Lattafa", "producto": "Yara X4 30ml Set Lujo", "detal": 35.0, "mayor": 28.0, "gran_mayor": 25.0, "genero": "Mujer", "imagen": "/static/fotos/yara-x4-set.jpg"},
     {"marca": "Louis Vuitton", "producto": "Ombre Nomade Unisex", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Unisex", "imagen": "/static/fotos/ombre-nomade.jpg"},
     {"marca": "Maison Francis Kurkdjian", "producto": "Baccarat Rouge 540 Unisex", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Unisex", "imagen": "/static/fotos/baccarat-rouge-540.jpg"},
     {"marca": "Montblanc", "producto": "Starwalker Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre", "imagen": "/static/fotos/starwalker-men.jpg"},
     {"marca": "Moschino", "producto": "Funny Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer", "imagen": "/static/fotos/funny-fem.jpg"},
     {"marca": "Moschino", "producto": "Toy 2 Pearl Unisex", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Unisex", "imagen": "/static/fotos/toy-2-pearl.jpg"},
-    {"marca": "Moschino", "producto": "Toy 2 X4 Set Lujo", "detal": 35.0, "mayor": 25.0, "gran_mayor": 23.0, "genero": "Unisex", "imagen": "/static/fotos/toy-2-x4-set.jpg"},
+    {"marca": "Moschino", "producto": "Toy 2 X4 Set Lujo", "detal": 35.0, "mayor": 28.0, "gran_mayor": 25.0, "genero": "Unisex", "imagen": "/static/fotos/toy-2-x4-set.jpg"},
     {"marca": "Moschino", "producto": "Toy 2 X3 Set Lujo", "detal": 22.0, "mayor": 18.5, "gran_mayor": 17.5, "genero": "Unisex", "imagen": "/static/fotos/toy-2-x3-set.jpg"},
     {"marca": "Moschino", "producto": "Toy Boy Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre", "imagen": "/static/fotos/toy-boy-men.jpg"},
-    {"marca": "Mundus", "producto": "Burj Khalifa Unisex", "detal": 35.0, "mayor": 25.0, "gran_mayor": 23.0, "genero": "Unisex", "imagen": "/static/fotos/burj-khalifa.jpg"},
-    {"marca": "Mundus", "producto": "Chichen Itza Unisex", "detal": 35.0, "mayor": 25.0, "gran_mayor": 23.0, "genero": "Unisex", "imagen": "/static/fotos/chichen-itza.jpg"},
-    {"marca": "Mundus", "producto": "Empire State", "detal": 35.0, "mayor": 25.0, "gran_mayor": 23.0, "genero": "Unisex", "imagen": "/static/fotos/empire-state.jpg"},
-    {"marca": "Mundus", "producto": "Taj Mahal Unisex", "detal": 35.0, "mayor": 25.0, "gran_mayor": 23.0, "genero": "Unisex", "imagen": "/static/fotos/taj-mahal.jpg"},
-    {"marca": "Mundus", "producto": "Torre Eiffel", "detal": 35.0, "mayor": 25.0, "gran_mayor": 23.0, "genero": "Unisex", "imagen": "/static/fotos/torre-eiffel.jpg"},
+    {"marca": "Mundus", "producto": "Burj Khalifa Unisex", "detal": 35.0, "mayor": 28.0, "gran_mayor": 25.0, "genero": "Unisex", "imagen": "/static/fotos/burj-khalifa.jpg"},
+    {"marca": "Mundus", "producto": "Chichen Itza Unisex", "detal": 35.0, "mayor": 28.0, "gran_mayor": 25.0, "genero": "Unisex", "imagen": "/static/fotos/chichen-itza.jpg"},
+    {"marca": "Mundus", "producto": "Empire State", "detal": 35.0, "mayor": 28.0, "gran_mayor": 25.0, "genero": "Unisex", "imagen": "/static/fotos/empire-state.jpg"},
+    {"marca": "Mundus", "producto": "Taj Mahal Unisex", "detal": 35.0, "mayor": 28.0, "gran_mayor": 25.0, "genero": "Unisex", "imagen": "/static/fotos/taj-mahal.jpg"},
+    {"marca": "Mundus", "producto": "Torre Eiffel", "detal": 35.0, "mayor": 28.0, "gran_mayor": 25.0, "genero": "Unisex", "imagen": "/static/fotos/torre-eiffel.jpg"},
     {"marca": "Nautica", "producto": "Voyage", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre", "imagen": "/static/fotos/nautica-voyage.jpg"},
     {"marca": "Orientica", "producto": "Amber Rouge Unisex", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Unisex", "imagen": "/static/fotos/orientica-amber-rouge.jpg"},
     {"marca": "Orientica", "producto": "Royal Amber Unisex", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Unisex", "imagen": "/static/fotos/orientica-royal-amber.jpg"},
@@ -167,7 +167,7 @@ CATALOGO = [
     {"marca": "Victoria's Secret", "producto": "Bombshell Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer", "imagen": "/static/fotos/bombshell-fem.jpg"},
     {"marca": "Viktor & Rolf", "producto": "Flowerbomb Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer", "imagen": "/static/fotos/flowerbomb-fem.jpg"},
     {"marca": "Viktor & Rolf", "producto": "Spicebomb Night Vision Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre", "imagen": "/static/fotos/spicebomb-night-vision.jpg"},
-    {"marca": "Xerjoff", "producto": "Erba Pura Unisex", "detal": 35.0, "mayor": 25.0, "gran_mayor": 23.0, "genero": "Unisex", "imagen": "/static/fotos/erba-pura.jpg"},
+    {"marca": "Xerjoff", "producto": "Erba Pura Unisex", "detal": 35.0, "mayor": 28.0, "gran_mayor": 25.0, "genero": "Unisex", "imagen": "/static/fotos/erba-pura.jpg"},
     {"marca": "Yves Saint Laurent", "producto": "Black Opium Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer", "imagen": "/static/fotos/black-opium.jpg"},
     {"marca": "Yves Saint Laurent", "producto": "Y Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre", "imagen": "/static/fotos/y-men.jpg"},
     {"marca": "Yves Saint Laurent", "producto": "Y Elixir Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre", "imagen": "/static/fotos/y-elixir.jpg"},
