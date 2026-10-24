@@ -10,14 +10,21 @@ def cargar_catalogo():
     
     for _, row in df.iterrows():
         nombre = str(row['Nombre'])
-        marca = str(row['marca']).strip()
+        marca = str(row['marca']).strip()  # Corregido: sin espacio
         
         detal = float(row['precio_venta']) if pd.notna(row['precio_venta']) else 0.0
         mayor = float(row['precio_mayor']) if pd.notna(row['precio_mayor']) else 0.0
         gran_mayor = float(row['precio_gran_mayor']) if pd.notna(row['precio_gran_mayor']) else 0.0
         
-        slug = nombre.lower().replace(' ', '-').replace("'", "").replace('"', '').replace('&', 'and')
-        imagen = f"/static/fotos/{slug}.jpg"
+        # Lógica corregida para leer la imagen desde el Excel
+        imagen_val = str(row['imagen']).strip() if 'imagen' in df.columns and pd.notna(row['imagen']) else ""
+        
+        # Si hay un enlace en el Excel, lo usa. Si no, busca la imagen en la carpeta local.
+        if imagen_val and imagen_val.lower() != 'nan' and imagen_val != 'None':
+            imagen = imagen_val
+        else:
+            slug = nombre.lower().replace(' ', '-').replace("'", "").replace('"', '').replace('&', 'and')
+            imagen = f"/static/fotos/{slug}.jpg"
         
         nombre_lower = nombre.lower()
         genero = 'Unisex'
@@ -48,7 +55,6 @@ HTML_TEMPLATE = """
     <style>
         body { background-color: #f4f6f8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
         
-        /* El banner como fondo total del encabezado con capa oscura para que resalte el texto */
         .header-bg { 
             background: linear-gradient(rgba(17, 24, 39, 0.7), rgba(17, 24, 39, 0.7)), url("{{ url_for('static', filename='fotos/banner.jpg') }}");
             background-size: cover;
