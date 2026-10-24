@@ -11,9 +11,10 @@ def cargar_catalogo():
     for _, row in df.iterrows():
         nombre = str(row['Nombre'])
         marca = str(row['marca ']).strip()
-        detal = float(row['precio_venta'])
-        mayor = float(row['precio_mayor'])
-        gran_mayor = float(row['precio_gran_mayor'])
+        
+        detal = float(row['precio_venta']) if pd.notna(row['precio_venta']) else 0.0
+        mayor = float(row['precio_mayor']) if pd.notna(row['precio_mayor']) else 0.0
+        gran_mayor = float(row['precio_gran_mayor']) if pd.notna(row['precio_gran_mayor']) else 0.0
         
         slug = nombre.lower().replace(' ', '-').replace("'", "").replace('"', '').replace('&', 'and')
         imagen = f"/static/fotos/{slug}.jpg"
@@ -46,7 +47,8 @@ HTML_TEMPLATE = """
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #f4f6f8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .header-bg { background: linear-gradient(135deg, #111827 0%, #1f2937 100%); color: white; padding: 2rem 1rem; text-align: center; border-bottom: 4px solid #d97706; }
+        .header-bg { background: linear-gradient(135deg, #111827 0%, #1f2937 100%); color: white; padding-bottom: 1.5rem; text-align: center; border-bottom: 4px solid #d97706; }
+        .banner-img { width: 100%; height: 220px; object-fit: cover; margin-bottom: 15px; border-radius: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
         .card-perfume { border: none; border-radius: 12px; transition: transform 0.2s, box-shadow 0.2s; background: #ffffff; }
         .card-perfume:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
         .badge-brand { background-color: #f3f4f6; color: #374151; font-weight: 600; font-size: 0.75rem; padding: 0.35em 0.65em; border-radius: 6px; }
@@ -60,11 +62,12 @@ HTML_TEMPLATE = """
 <body>
 
     <div class="header-bg shadow-sm mb-4">
-        <!-- Banner ajustado en tamaño grande y elegante -->
-        <img src="{{ url_for('static', filename='fotos/banner.jpg') }}" alt="Aroma2 Banner" style="width: 100%; max-height: 180px; object-fit: cover; margin-bottom: 15px; border-radius: 8px;" onerror="this.style.display='none';">
-        
-        <h1 class="fw-bold m-0">✨ Catálogo de Perfumes</h1>
-        <p class="text-light opacity-75 mt-1 small">Detal, Mayor (6+ unds) y Gran Mayor (15+ unds)</p>
+        <!-- Banner de lado a lado cubriendo todo el ancho -->
+        <img src="{{ url_for('static', filename='fotos/banner.jpg') }}" alt="Aroma2 Banner" class="banner-img" onerror="this.style.display='none';">
+        <div class="px-3">
+            <h1 class="fw-bold m-0">✨ Catálogo de Perfumes</h1>
+            <p class="text-light opacity-75 mt-1 small">Detal, Mayor (6+ unds) y Gran Mayor (15+ unds)</p>
+        </div>
     </div>
 
     <div class="container pb-5">
@@ -90,7 +93,6 @@ HTML_TEMPLATE = """
                             {% endif %}
                         </div>
 
-                        <!-- Imagen automática -->
                         <div class="img-container">
                             <img src="{{ item.imagen }}" onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\'text-muted small\'>📷 Sin imagen</span>';" alt="{{ item.producto }}">
                         </div>
