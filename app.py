@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from Flask import Flask, render_template_string, url_for
+from flask import Flask, render_template_string, url_for
 
 app = Flask(__name__)
 
@@ -10,21 +10,15 @@ def cargar_catalogo():
     
     for _, row in df.iterrows():
         nombre = str(row['Nombre'])
-        marca = str(row['marca']).strip()  # Corregido: sin espacio
+        marca = str(row['marca']).strip() # CORREGIDO: sin espacio
         
         detal = float(row['precio_venta']) if pd.notna(row['precio_venta']) else 0.0
         mayor = float(row['precio_mayor']) if pd.notna(row['precio_mayor']) else 0.0
         gran_mayor = float(row['precio_gran_mayor']) if pd.notna(row['precio_gran_mayor']) else 0.0
         
-        # Lógica corregida para leer la imagen desde el Excel
-        imagen_val = str(row['imagen']).strip() if 'imagen' in df.columns and pd.notna(row['imagen']) else ""
-        
-        # Si hay un enlace en el Excel, lo usa. Si no, busca la imagen en la carpeta local.
-        if imagen_val and imagen_val.lower() != 'nan' and imagen_val != 'None':
-            imagen = imagen_val
-        else:
-            slug = nombre.lower().replace(' ', '-').replace("'", "").replace('"', '').replace('&', 'and')
-            imagen = f"/static/fotos/{slug}.jpg"
+        # LÓGICA DEFINITIVA: Busca la imagen en la carpeta static/fotos
+        slug = nombre.lower().replace(' ', '-').replace("'", "").replace('"', '').replace('&', 'and')
+        imagen = f"/static/fotos/{slug}.jpg"
         
         nombre_lower = nombre.lower()
         genero = 'Unisex'
