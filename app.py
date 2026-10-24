@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from flask import Flask, render_template_string, url_for
+from Flask import Flask, render_template_string, url_for
 
 app = Flask(__name__)
 
@@ -48,37 +48,15 @@ HTML_TEMPLATE = """
     <style>
         body { background-color: #f4f6f8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
         
-        /* Encabezado con el banner cubriendo todo el espacio de fondo */
+        /* El banner como fondo total del encabezado con capa oscura para que resalte el texto */
         .header-bg { 
-            position: relative; 
-            background-color: #111827; 
+            background: linear-gradient(rgba(17, 24, 39, 0.7), rgba(17, 24, 39, 0.7)), url("{{ url_for('static', filename='fotos/banner.jpg') }}");
+            background-size: cover;
+            background-position: center;
             color: white; 
             text-align: center; 
             border-bottom: 4px solid #d97706; 
-            padding: 2.8rem 1rem; 
-            overflow: hidden; 
-        }
-        .banner-img-bg { 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-            z-index: 1; 
-        }
-        .header-overlay { 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            background: rgba(17, 24, 39, 0.65); /* Capa oscura para resaltar el texto */
-            z-index: 2; 
-        }
-        .header-content { 
-            position: relative; 
-            z-index: 3; 
+            padding: 3rem 1rem; 
         }
 
         .card-perfume { border: none; border-radius: 12px; transition: transform 0.2s, box-shadow 0.2s; background: #ffffff; }
@@ -94,14 +72,8 @@ HTML_TEMPLATE = """
 <body>
 
     <div class="header-bg shadow-sm mb-4">
-        <!-- El banner cubre todo el fondo del encabezado -->
-        <img src="{{ url_for('static', filename='fotos/banner.jpg') }}" alt="Aroma2 Banner" class="banner-img-bg" onerror="this.style.display='none';">
-        <div class="header-overlay"></div>
-        
-        <div class="header-content">
-            <h1 class="fw-bold m-0">✨ Catálogo de Perfumes</h1>
-            <p class="text-light opacity-75 mt-1 small">Detal, Mayor (6+ unds) y Gran Mayor (15+ unds)</p>
-        </div>
+        <h1 class="fw-bold m-0">✨ Catálogo de Perfumes</h1>
+        <p class="text-light opacity-75 mt-1 small">Detal, Mayor (6+ unds) y Gran Mayor (15+ unds)</p>
     </div>
 
     <div class="container pb-5">
