@@ -48,7 +48,7 @@ HTML_TEMPLATE = """
     <style>
         body { background-color: #f4f6f8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
         .header-bg { background: linear-gradient(135deg, #111827 0%, #1f2937 100%); color: white; padding: 0 0 1.5rem 0; text-align: center; border-bottom: 4px solid #d97706; }
-        .banner-img { width: 100%; height: 250px; object-fit: cover; margin-bottom: 15px; border-radius: 0; display: block; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+        .banner-img { width: 100%; max-height: 240px; object-fit: contain; display: block; margin: 0 auto; background-color: #0b0f19; }
         .card-perfume { border: none; border-radius: 12px; transition: transform 0.2s, box-shadow 0.2s; background: #ffffff; }
         .card-perfume:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
         .badge-brand { background-color: #f3f4f6; color: #374151; font-weight: 600; font-size: 0.75rem; padding: 0.35em 0.65em; border-radius: 6px; }
@@ -62,9 +62,9 @@ HTML_TEMPLATE = """
 <body>
 
     <div class="header-bg shadow-sm mb-4">
-        <!-- Banner 100% ancho, sin márgenes -->
+        <!-- Banner ajustado sin espacios sobrantes -->
         <img src="{{ url_for('static', filename='fotos/banner.jpg') }}" alt="Aroma2 Banner" class="banner-img" onerror="this.style.display='none';">
-        <div class="px-3">
+        <div class="px-3 pt-3">
             <h1 class="fw-bold m-0">✨ Catálogo de Perfumes</h1>
             <p class="text-light opacity-75 mt-1 small">Detal, Mayor (6+ unds) y Gran Mayor (15+ unds)</p>
         </div>
