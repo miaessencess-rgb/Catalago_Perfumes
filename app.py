@@ -10,15 +10,23 @@ def cargar_catalogo():
     
     for _, row in df.iterrows():
         nombre = str(row['Nombre'])
-        marca = str(row['marca']).strip() # CORREGIDO: sin espacio
+        marca = str(row['marca']).strip() # Espacio corregido
         
         detal = float(row['precio_venta']) if pd.notna(row['precio_venta']) else 0.0
         mayor = float(row['precio_mayor']) if pd.notna(row['precio_mayor']) else 0.0
         gran_mayor = float(row['precio_gran_mayor']) if pd.notna(row['precio_gran_mayor']) else 0.0
         
-        # LÓGICA DEFINITIVA: Busca la imagen en la carpeta static/fotos
+        # LÓGICA INTELIGENTE: Busca la imagen en static/fotos en cualquier formato
         slug = nombre.lower().replace(' ', '-').replace("'", "").replace('"', '').replace('&', 'and')
-        imagen = f"/static/fotos/{slug}.jpg"
+        
+        # Revisa si la foto existe en .jpg, .png, .jpeg o .webp
+        formatos = ['.jpg', '.png', '.jpeg', '.webp', '.JPG', '.PNG']
+        imagen = f"/static/fotos/{slug}.jpg" # Valor por defecto
+        for ext in formatos:
+            ruta_prueba = f"static/fotos/{slug}{ext}"
+            if os.path.exists(ruta_prueba):
+                imagen = f"/static/fotos/{slug}{ext}"
+                break
         
         nombre_lower = nombre.lower()
         genero = 'Unisex'
