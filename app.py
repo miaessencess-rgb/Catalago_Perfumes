@@ -10,7 +10,7 @@ def cargar_catalogo():
     
     for _, row in df.iterrows():
         nombre = str(row['Nombre'])
-        marca = str(row['marca ']).strip()
+        marca = str(row['marca']).strip()
         
         detal = float(row['precio_venta']) if pd.notna(row['precio_venta']) else 0.0
         mayor = float(row['precio_mayor']) if pd.notna(row['precio_mayor']) else 0.0
