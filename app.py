@@ -47,8 +47,9 @@ HTML_TEMPLATE = """
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #f4f6f8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
-        .header-bg { background: linear-gradient(135deg, #111827 0%, #1f2937 100%); color: white; padding: 0 0 1.5rem 0; text-align: center; border-bottom: 4px solid #d97706; }
-        .banner-img { width: 100%; max-height: 240px; object-fit: contain; display: block; margin: 0 auto; background-color: #0b0f19; }
+        .header-bg { background: linear-gradient(135deg, #111827 0%, #1f2937 100%); color: white; text-align: center; border-bottom: 4px solid #d97706; padding: 0; }
+        .banner-img { width: 100%; height: 220px; object-fit: cover; display: block; margin: 0; border-radius: 0; }
+        .header-content { padding: 1.2rem 1rem; }
         .card-perfume { border: none; border-radius: 12px; transition: transform 0.2s, box-shadow 0.2s; background: #ffffff; }
         .card-perfume:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
         .badge-brand { background-color: #f3f4f6; color: #374151; font-weight: 600; font-size: 0.75rem; padding: 0.35em 0.65em; border-radius: 6px; }
@@ -62,9 +63,9 @@ HTML_TEMPLATE = """
 <body>
 
     <div class="header-bg shadow-sm mb-4">
-        <!-- Banner ajustado sin espacios sobrantes -->
+        <!-- Banner cubriendo todo el ancho y alto asignado de forma perfecta -->
         <img src="{{ url_for('static', filename='fotos/banner.jpg') }}" alt="Aroma2 Banner" class="banner-img" onerror="this.style.display='none';">
-        <div class="px-3 pt-3">
+        <div class="header-content">
             <h1 class="fw-bold m-0">✨ Catálogo de Perfumes</h1>
             <p class="text-light opacity-75 mt-1 small">Detal, Mayor (6+ unds) y Gran Mayor (15+ unds)</p>
         </div>
