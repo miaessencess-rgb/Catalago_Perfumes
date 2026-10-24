@@ -48,7 +48,8 @@ HTML_TEMPLATE = """
     <style>
         body { background-color: #f4f6f8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
         .header-bg { background: linear-gradient(135deg, #111827 0%, #1f2937 100%); color: white; text-align: center; border-bottom: 4px solid #d97706; padding: 0; }
-        .banner-img { width: 100%; height: 220px; object-fit: cover; display: block; margin: 0; border-radius: 0; }
+        /* Altura aumentada a 320px para aprovechar tu imagen de 1080x540 */
+        .banner-img { width: 100%; height: 320px; object-fit: cover; display: block; margin: 0; border-radius: 0; }
         .header-content { padding: 1.2rem 1rem; }
         .card-perfume { border: none; border-radius: 12px; transition: transform 0.2s, box-shadow 0.2s; background: #ffffff; }
         .card-perfume:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
@@ -63,7 +64,6 @@ HTML_TEMPLATE = """
 <body>
 
     <div class="header-bg shadow-sm mb-4">
-        <!-- Banner cubriendo todo el ancho y alto asignado de forma perfecta -->
         <img src="{{ url_for('static', filename='fotos/banner.jpg') }}" alt="Aroma2 Banner" class="banner-img" onerror="this.style.display='none';">
         <div class="header-content">
             <h1 class="fw-bold m-0">✨ Catálogo de Perfumes</h1>
