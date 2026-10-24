@@ -47,10 +47,40 @@ HTML_TEMPLATE = """
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #f4f6f8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
-        .header-bg { background: linear-gradient(135deg, #111827 0%, #1f2937 100%); color: white; text-align: center; border-bottom: 4px solid #d97706; padding: 0; }
-        /* Altura aumentada a 320px para aprovechar tu imagen de 1080x540 */
-        .banner-img { width: 100%; height: 320px; object-fit: cover; display: block; margin: 0; border-radius: 0; }
-        .header-content { padding: 1.2rem 1rem; }
+        
+        /* Encabezado con el banner cubriendo todo el espacio de fondo */
+        .header-bg { 
+            position: relative; 
+            background-color: #111827; 
+            color: white; 
+            text-align: center; 
+            border-bottom: 4px solid #d97706; 
+            padding: 2.8rem 1rem; 
+            overflow: hidden; 
+        }
+        .banner-img-bg { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            z-index: 1; 
+        }
+        .header-overlay { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(17, 24, 39, 0.65); /* Capa oscura para resaltar el texto */
+            z-index: 2; 
+        }
+        .header-content { 
+            position: relative; 
+            z-index: 3; 
+        }
+
         .card-perfume { border: none; border-radius: 12px; transition: transform 0.2s, box-shadow 0.2s; background: #ffffff; }
         .card-perfume:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
         .badge-brand { background-color: #f3f4f6; color: #374151; font-weight: 600; font-size: 0.75rem; padding: 0.35em 0.65em; border-radius: 6px; }
@@ -64,7 +94,10 @@ HTML_TEMPLATE = """
 <body>
 
     <div class="header-bg shadow-sm mb-4">
-        <img src="{{ url_for('static', filename='fotos/banner.jpg') }}" alt="Aroma2 Banner" class="banner-img" onerror="this.style.display='none';">
+        <!-- El banner cubre todo el fondo del encabezado -->
+        <img src="{{ url_for('static', filename='fotos/banner.jpg') }}" alt="Aroma2 Banner" class="banner-img-bg" onerror="this.style.display='none';">
+        <div class="header-overlay"></div>
+        
         <div class="header-content">
             <h1 class="fw-bold m-0">✨ Catálogo de Perfumes</h1>
             <p class="text-light opacity-75 mt-1 small">Detal, Mayor (6+ unds) y Gran Mayor (15+ unds)</p>
