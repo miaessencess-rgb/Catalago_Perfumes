@@ -1,207 +1,178 @@
-from flask import Flask, render_template_string, request
+import os
+from flask import Flask, render_template_string
 
 app = Flask(__name__)
 
-# Base de datos organizada por Marca / Casa de Perfume
-# Nota: Puedes actualizar los precios directamente en este diccionario
+# Catálogo completo con precios Detal, Mayor y Gran Mayor
 CATALOGO = [
-    {"marca": "AFNAN", "producto": "9PM Elixir", "precio": 0, "genero": "Unisex"},
-    {"marca": "AFNAN", "producto": "9PM Night Out", "precio": 0, "genero": "Hombre"},
-    {"marca": "AFNAN", "producto": "9AM Unisex (100ml)", "precio": 0, "genero": "Unisex"},
-    {"marca": "AFNAN", "producto": "9AM Unisex (50ml)", "precio": 0, "genero": "Unisex"},
-    {"marca": "AFNAN", "producto": "9AM Dive (100ml)", "precio": 0, "genero": "Unisex"},
-    {"marca": "AFNAN", "producto": "9AM Dive (50ml)", "precio": 0, "genero": "Unisex"},
-    {"marca": "AFNAN", "producto": "9PM Rebel (50ml)", "precio": 0, "genero": "Hombre"},
-    
-    {"marca": "AL HARAMAIN", "producto": "Amber Oud Exclusif Emerald Unisex", "precio": 0, "genero": "Unisex"},
-    {"marca": "AL HARAMAIN", "producto": "Amber Oud Gold Edition Unisex", "precio": 0, "genero": "Unisex"},
-    {"marca": "AL HARAMAIN", "producto": "Amber Oud Ultra Violet Fem", "precio": 0, "genero": "Mujer"},
-    
-    {"marca": "AMOUAGE", "producto": "Interlude Men", "precio": 0, "genero": "Hombre"},
-    
-    {"marca": "ARIANA GRANDE", "producto": "Cloud 2.0", "precio": 0, "genero": "Mujer"},
-    {"marca": "ARIANA GRANDE", "producto": "Cloud Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "ARIANA GRANDE", "producto": "Mod Blush Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "ARIANA GRANDE", "producto": "Mod Vanilla Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "ARIANA GRANDE", "producto": "R.E.M. Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "ARIANA GRANDE", "producto": "Thank U Next Fem", "precio": 0, "genero": "Mujer"},
-    
-    {"marca": "ARMAF", "producto": "Silver Infinity", "precio": 0, "genero": "Unisex"},
-    {"marca": "ARMAF", "producto": "Gold Infinity", "precio": 0, "genero": "Unisex"},
-    {"marca": "ARMAF", "producto": "Club de Nuit Lionheart Woman Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "ARMAF", "producto": "Club de Nuit X3 30ml Set Lujo (Intense Man, Milestone, Sillage)", "precio": 0, "genero": "Unisex"},
-    {"marca": "ARMAF", "producto": "Club de Nuit Parfum A Collector’s Pride X3 30ml Set Lujo", "precio": 0, "genero": "Unisex"},
-    {"marca": "ARMAF", "producto": "Club de Nuit Untold", "precio": 0, "genero": "Unisex"},
-    {"marca": "ARMAF", "producto": "Club de Nuit Milestone Unisex", "precio": 0, "genero": "Unisex"},
-    {"marca": "ARMAF", "producto": "Club de Nuit Oud Unisex", "precio": 0, "genero": "Unisex"},
-    {"marca": "ARMAF", "producto": "Beach Party", "precio": 0, "genero": "Unisex"},
-    {"marca": "ARMAF", "producto": "Odyssey Mandarin Sky", "precio": 0, "genero": "Hombre"},
-    {"marca": "ARMAF", "producto": "Odyssey Mandarin Sky Elixir Unisex", "precio": 0, "genero": "Unisex"},
-    {"marca": "ARMAF", "producto": "Odyssey Mandarin Sky Vintage", "precio": 0, "genero": "Hombre"},
-    {"marca": "ARMAF", "producto": "Odyssey Aoud Men", "precio": 0, "genero": "Hombre"},
-    {"marca": "ARMAF", "producto": "Odyssey Set Lujo X3 (Candee, Mandarin Sky, Dubai Chocolat)", "precio": 0, "genero": "Unisex"},
-    {"marca": "ARMAF", "producto": "Odyssey Homme Men", "precio": 0, "genero": "Hombre"},
-    {"marca": "ARMAF", "producto": "Odyssey Mega Men", "precio": 0, "genero": "Hombre"},
-    {"marca": "ARMAF", "producto": "Odyssey Tyrant Men", "precio": 0, "genero": "Hombre"},
-    {"marca": "ARMAF", "producto": "Odyssey Wild One Gold Edition Men", "precio": 0, "genero": "Hombre"},
-    {"marca": "ARMAF", "producto": "Island Breeze Unisex Lujo Premium", "precio": 0, "genero": "Unisex"},
-    {"marca": "ARMAF", "producto": "Bon Bon", "precio": 0, "genero": "Mujer"},
-    {"marca": "ARMAF", "producto": "Island Bliss Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "ARMAF", "producto": "Yum Yum Fem", "precio": 0, "genero": "Mujer"},
-    
-    {"marca": "BHARARA", "producto": "King Soleil Unisex Lujo Premium", "precio": 0, "genero": "Unisex"},
-    {"marca": "BHARARA", "producto": "Queen Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "BHARARA", "producto": "Rose Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "BHARARA", "producto": "Viking Dubai", "precio": 0, "genero": "Unisex"},
-    {"marca": "BHARARA", "producto": "Viking Beirut", "precio": 0, "genero": "Unisex"},
-    {"marca": "BHARARA", "producto": "Viking Cairo", "precio": 0, "genero": "Unisex"},
-    {"marca": "BHARARA", "producto": "Viking Kashmir", "precio": 0, "genero": "Unisex"},
-    {"marca": "BHARARA", "producto": "Scarlet Fem", "precio": 0, "genero": "Mujer"},
-    
-    {"marca": "BRITNEY SPEARS", "producto": "Fantasy Midnight", "precio": 0, "genero": "Mujer"},
-    {"marca": "BRITNEY SPEARS", "producto": "Fantasy Circus", "precio": 0, "genero": "Mujer"},
-    
-    {"marca": "BVLGARI", "producto": "Man Extreme Men", "precio": 0, "genero": "Hombre"},
-    {"marca": "BVLGARI", "producto": "Man In Black Men", "precio": 0, "genero": "Hombre"},
-    {"marca": "BVLGARI", "producto": "Omnia Coral Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "BVLGARI", "producto": "Man Wood Essence Men", "precio": 0, "genero": "Hombre"},
-    {"marca": "BVLGARI", "producto": "Aqva Pour Homme Men", "precio": 0, "genero": "Hombre"},
-    
-    {"marca": "CAROLINA HERRERA", "producto": "212 Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "CAROLINA HERRERA", "producto": "212 Men NYC", "precio": 0, "genero": "Hombre"},
-    {"marca": "CAROLINA HERRERA", "producto": "212 VIP Black Men", "precio": 0, "genero": "Hombre"},
-    {"marca": "CAROLINA HERRERA", "producto": "212 VIP Wins Men", "precio": 0, "genero": "Hombre"},
-    {"marca": "CAROLINA HERRERA", "producto": "212 VIP Rosé Fem", "precio": 0, "genero": "Mujer"},
-    
-    {"marca": "CHANEL", "producto": "Allure Homme Sport Men", "precio": 0, "genero": "Hombre"},
-    {"marca": "CHANEL", "producto": "No 5 Eau de Parfum Fem", "precio": 0, "genero": "Mujer"},
-    
-    {"marca": "DEVIER", "producto": "Oud Silence Unisex", "precio": 0, "genero": "Unisex"},
-    {"marca": "DEVIER", "producto": "D' Christian Unisex", "precio": 0, "genero": "Unisex"},
-    {"marca": "DEVIER", "producto": "Fresh Orient Unisex", "precio": 0, "genero": "Unisex"},
-    {"marca": "DEVIER", "producto": "Silver Danger Unisex", "precio": 0, "genero": "Unisex"},
-    {"marca": "DEVIER", "producto": "D' Narcoide Unisex", "precio": 0, "genero": "Unisex"},
-    
-    {"marca": "DIOR", "producto": "Sauvage Parfum Men", "precio": 0, "genero": "Hombre"},
-    
-    {"marca": "DOLCE & GABBANA", "producto": "Devotion Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "DOLCE & GABBANA", "producto": "Light Blue Fem", "precio": 0, "genero": "Mujer"},
-    
-    {"marca": "ESCADA", "producto": "Rockin' Rio Fem", "precio": 0, "genero": "Mujer"},
-    
-    {"marca": "FRENCH AVENUE", "producto": "Vulcan Feu", "precio": 0, "genero": "Unisex"},
-    {"marca": "FRENCH AVENUE", "producto": "Vulcan Sable Unisex Lujo Premium", "precio": 0, "genero": "Unisex"},
-    
-    {"marca": "GIVENCHY", "producto": "Ange Ou Demon Fem", "precio": 0, "genero": "Mujer"},
-    
-    {"marca": "HUGO BOSS", "producto": "Bottled Men", "precio": 0, "genero": "Hombre"},
-    {"marca": "HUGO BOSS", "producto": "Bottled Night Men", "precio": 0, "genero": "Hombre"},
-    
-    {"marca": "INITIO", "producto": "Oud For Greatness Unisex", "precio": 0, "genero": "Unisex"},
-    
-    {"marca": "INVICTUS", "producto": "Parfum Men", "precio": 0, "genero": "Hombre"},
-    
-    {"marca": "JUICY COUTURE", "producto": "Viva La Juicy", "precio": 0, "genero": "Mujer"},
-    
-    {"marca": "KATY PERRY", "producto": "Purr Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "KATY PERRY", "producto": "Meow", "precio": 0, "genero": "Mujer"},
-    
-    {"marca": "LACOSTE", "producto": "Blue Men", "precio": 0, "genero": "Hombre"},
-    {"marca": "LACOSTE", "producto": "Essential Men", "precio": 0, "genero": "Hombre"},
-    {"marca": "LACOSTE", "producto": "Green Men", "precio": 0, "genero": "Hombre"},
-    {"marca": "LACOSTE", "producto": "Natural Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "LACOSTE", "producto": "Red Men", "precio": 0, "genero": "Hombre"},
-    {"marca": "LACOSTE", "producto": "Rouge Energetic Men", "precio": 0, "genero": "Hombre"},
-    {"marca": "LACOSTE", "producto": "White Men", "precio": 0, "genero": "Hombre"},
-    
-    {"marca": "LANCOME", "producto": "La Vie Est Belle Fem", "precio": 0, "genero": "Mujer"},
-    
-    {"marca": "LATTAFA", "producto": "Asad Men", "precio": 0, "genero": "Hombre"},
-    {"marca": "LATTAFA", "producto": "Bade'e Al Oud Amethyst Unisex", "precio": 0, "genero": "Unisex"},
-    {"marca": "LATTAFA", "producto": "Bade'e Al Oud Oud For Glory Unisex", "precio": 0, "genero": "Unisex"},
-    {"marca": "LATTAFA", "producto": "Bade'e Al Oud Honor & Glory Unisex", "precio": 0, "genero": "Unisex"},
-    {"marca": "LATTAFA", "producto": "Noble Blush Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "LATTAFA", "producto": "Bade'e Al Oud 30ml Set Lujo", "precio": 0, "genero": "Unisex"},
-    {"marca": "LATTAFA", "producto": "Choco Overdose Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "LATTAFA", "producto": "Cookie Crave Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "LATTAFA", "producto": "Mallow Madness Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "LATTAFA", "producto": "Vanilla Freak - Give Me Gourmand", "precio": 0, "genero": "Unisex"},
-    {"marca": "LATTAFA", "producto": "Whipped Pleasure - Give Me Gourmand", "precio": 0, "genero": "Unisex"},
-    {"marca": "LATTAFA", "producto": "Sehr", "precio": 0, "genero": "Unisex"},
-    {"marca": "LATTAFA", "producto": "Atheeri", "precio": 0, "genero": "Unisex"},
-    {"marca": "LATTAFA", "producto": "Emeer", "precio": 0, "genero": "Unisex"},
-    {"marca": "LATTAFA", "producto": "Fakhar Extrait Men", "precio": 0, "genero": "Hombre"},
-    {"marca": "LATTAFA", "producto": "Her Confession Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "LATTAFA", "producto": "His Confession Men", "precio": 0, "genero": "Hombre"},
-    {"marca": "LATTAFA", "producto": "Khamrah Zangam Unisex", "precio": 0, "genero": "Unisex"},
-    {"marca": "LATTAFA", "producto": "Khamrah Karaz Unisex", "precio": 0, "genero": "Unisex"},
-    {"marca": "LATTAFA", "producto": "Set Khamrah 3x 35ml (Clásica, Dukhan, Qahwa)", "precio": 0, "genero": "Unisex"},
-    {"marca": "LATTAFA", "producto": "Yara Candy Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "LATTAFA", "producto": "Yara Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "LATTAFA", "producto": "Yara Moi Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "LATTAFA", "producto": "Yara Tous Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "LATTAFA", "producto": "Yara X3 30ml Set Lujo", "precio": 0, "genero": "Mujer"},
-    {"marca": "LATTAFA", "producto": "Yara X4 30ml Set Lujo", "precio": 0, "genero": "Mujer"},
-    {"marca": "LATTAFA", "producto": "Mayar Natural Intense Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "LATTAFA", "producto": "Mayar Fem", "precio": 0, "genero": "Mujer"},
-    
-    {"marca": "LOUIS VUITTON", "producto": "Ombre Nomade Unisex", "precio": 0, "genero": "Unisex"},
-    {"marca": "MAISON FRANCIS KURKDJIAN", "producto": "Baccarat Rouge 540 Unisex", "precio": 0, "genero": "Unisex"},
-    {"marca": "MONTBLANC", "producto": "Starwalker Men", "precio": 0, "genero": "Hombre"},
-    
-    {"marca": "MOSCHINO", "producto": "Funny Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "MOSCHINO", "producto": "Toy 2 Pearl Unisex", "precio": 0, "genero": "Unisex"},
-    {"marca": "MOSCHINO", "producto": "Toy 2 X4 Set Lujo", "precio": 0, "genero": "Unisex"},
-    {"marca": "MOSCHINO", "producto": "Toy 2 X3 Set Lujo", "precio": 0, "genero": "Unisex"},
-    {"marca": "MOSCHINO", "producto": "Toy Boy Men", "precio": 0, "genero": "Hombre"},
-    
-    {"marca": "MUNDUS", "producto": "Burj Khalifa Unisex", "precio": 0, "genero": "Unisex"},
-    {"marca": "MUNDUS", "producto": "Chichen Itza Unisex", "precio": 0, "genero": "Unisex"},
-    {"marca": "MUNDUS", "producto": "Empire State", "precio": 0, "genero": "Unisex"},
-    {"marca": "MUNDUS", "producto": "Taj Mahal Unisex", "precio": 0, "genero": "Unisex"},
-    {"marca": "MUNDUS", "producto": "Torre Eiffel", "precio": 0, "genero": "Unisex"},
-    
-    {"marca": "NAUTICA", "producto": "Voyage", "precio": 0, "genero": "Hombre"},
-    
-    {"marca": "ORIENTICA", "producto": "Premium - Royal Amber Unisex", "precio": 0, "genero": "Unisex"},
-    {"marca": "ORIENTICA", "producto": "Premium - Velvet Gold Unisex", "precio": 0, "genero": "Unisex"},
-    {"marca": "ORIENTICA", "producto": "Premium - Oud Saffron Unisex", "precio": 0, "genero": "Unisex"},
-    {"marca": "ORIENTICA", "producto": "Premium - Noble Unisex", "precio": 0, "genero": "Unisex"},
-    {"marca": "ORIENTICA", "producto": "Dania Fem", "precio": 0, "genero": "Mujer"},
-    
-    {"marca": "PARFUMS DE MARLY", "producto": "Delina Fem", "precio": 0, "genero": "Mujer"},
-    
-    {"marca": "PARIS HILTON", "producto": "Can Can Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "PARIS HILTON", "producto": "Dazzle Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "PARIS HILTON", "producto": "Heiress Fem", "precio": 0, "genero": "Mujer"},
-    
-    {"marca": "PERRY ELLIS", "producto": "360° Coral Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "PERRY ELLIS", "producto": "360° Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "PERRY ELLIS", "producto": "360° Men", "precio": 0, "genero": "Hombre"},
-    
-    {"marca": "PRADA", "producto": "Paradoxe", "precio": 0, "genero": "Mujer"},
-    
-    {"marca": "RABANNE", "producto": "Black XS Aphrodisiaque Men", "precio": 0, "genero": "Hombre"},
-    {"marca": "RABANNE", "producto": "Black XS L'Exces Men", "precio": 0, "genero": "Hombre"},
-    {"marca": "RABANNE", "producto": "Black XS Men", "precio": 0, "genero": "Hombre"},
-    {"marca": "RABANNE", "producto": "Pure XS Men", "precio": 0, "genero": "Hombre"},
-    {"marca": "RABANNE", "producto": "Fame Couture Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "RABANNE", "producto": "Fame Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "RABANNE", "producto": "Fame Parfum Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "RABANNE", "producto": "Million Gold Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "RABANNE", "producto": "Olympéa Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "RABANNE", "producto": "One Million Lucky Men", "precio": 0, "genero": "Hombre"},
-    {"marca": "RABANNE", "producto": "One Million Prive Men", "precio": 0, "genero": "Hombre"},
-    {"marca": "RABANNE", "producto": "One Million Royal Men", "precio": 0, "genero": "Hombre"},
-    
-    {"marca": "RALPH LAUREN", "producto": "Ralph Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "RALPH LAUREN", "producto": "Love Fem", "precio": 0, "genero": "Mujer"},
-    
-    {"marca": "TOMMY HILFIGER", "producto": "Men", "precio": 0, "genero": "Hombre"},
-    {"marca": "VALENTINO", "producto": "Donna", "precio": 0, "genero": "Mujer"},
-    {"marca": "VERSACE", "producto": "Eros Energy Men", "precio": 0, "genero": "Hombre"},
-    {"marca": "VERSACE", "producto": "Yellow Diamond Fem", "precio": 0, "genero": "Mujer"},
-    {"marca": "XERJOFF", "producto": "Erba Pura", "precio": 0, "genero": "Unisex"}
+    {"marca": "Afnan", "producto": "9PM Elixir", "detal": 20.0, "mayor": 16.5, "gran_mayor": 14.5, "genero": "Hombre"},
+    {"marca": "Afnan", "producto": "9PM Night Out", "detal": 25.0, "mayor": 19.0, "gran_mayor": 16.5, "genero": "Hombre"},
+    {"marca": "Afnan", "producto": "9AM Unisex", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Unisex"},
+    {"marca": "Afnan", "producto": "9AM Dive", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Unisex"},
+    {"marca": "Afnan", "producto": "9AM Dive Unisex 50ml", "detal": 12.0, "mayor": 9.0, "gran_mayor": 8.0, "genero": "Unisex"},
+    {"marca": "Afnan", "producto": "9AM Unisex 50ml", "detal": 12.0, "mayor": 9.0, "gran_mayor": 8.0, "genero": "Unisex"},
+    {"marca": "Afnan", "producto": "9PM Rebel 50ml", "detal": 12.0, "mayor": 9.0, "gran_mayor": 8.0, "genero": "Hombre"},
+    {"marca": "Al Haramain", "producto": "Amber Oud Exclusif Emerald", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Unisex"},
+    {"marca": "Al Haramain", "producto": "Amber Oud Gold Edition", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Unisex"},
+    {"marca": "Al Haramain", "producto": "Amber Oud Ultra Violet", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Unisex"},
+    {"marca": "Amouage", "producto": "Interlude Men", "detal": 15.0, "mayor": 13.0, "gran_mayor": 11.5, "genero": "Hombre"},
+    {"marca": "Ariana Grande", "producto": "Cloud 2.0", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Ariana Grande", "producto": "Cloud Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Ariana Grande", "producto": "Mod Blush Fem", "detal": 15.0, "mayor": 13.0, "gran_mayor": 11.5, "genero": "Mujer"},
+    {"marca": "Ariana Grande", "producto": "Mod Vanilla Fem", "detal": 15.0, "mayor": 13.0, "gran_mayor": 11.5, "genero": "Mujer"},
+    {"marca": "Ariana Grande", "producto": "R.E.M. Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Ariana Grande", "producto": "Thank U Next Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Armaf", "producto": "Silver Infinity", "detal": 28.0, "mayor": 23.5, "gran_mayor": 21.5, "genero": "Hombre"},
+    {"marca": "Armaf", "producto": "Gold Infinity", "detal": 28.0, "mayor": 23.5, "gran_mayor": 21.5, "genero": "Unisex"},
+    {"marca": "Armaf", "producto": "Club de Nuit Lionheart Woman", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Mujer"},
+    {"marca": "Armaf", "producto": "Club De Nuit Man Intense 105ml", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Armaf", "producto": "Club De Nuit Milestone", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Unisex"},
+    {"marca": "Armaf", "producto": "Club De Nuit Woman 105ml", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Armaf", "producto": "Odyssey Aqua Edition", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Hombre"},
+    {"marca": "Armaf", "producto": "Odyssey Mandarin Sky", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Hombre"},
+    {"marca": "Armaf", "producto": "Club de Nuit Lionheart Man", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Hombre"},
+    {"marca": "Armaf", "producto": "Island Lush", "detal": 28.0, "mayor": 23.5, "gran_mayor": 21.5, "genero": "Unisex"},
+    {"marca": "Armaf", "producto": "Odyssey Candyland", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Mujer"},
+    {"marca": "Armaf", "producto": "Odyssey Homme White Edition", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Hombre"},
+    {"marca": "Armaf", "producto": "Odyssey Limoni", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Unisex"},
+    {"marca": "Armaf", "producto": "Odyssey Mega", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Hombre"},
+    {"marca": "Armaf", "producto": "Odyssey Tyrant Special Edition", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Hombre"},
+    {"marca": "Armaf", "producto": "Odissey Wild One", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Hombre"},
+    {"marca": "Bharara", "producto": "Bharara King", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Hombre"},
+    {"marca": "Bharara", "producto": "King Fast Black", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Hombre"},
+    {"marca": "Bharara", "producto": "Onyx Unisex", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Unisex"},
+    {"marca": "Bharara", "producto": "Viking Beirut", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Hombre"},
+    {"marca": "Bharara", "producto": "Viking Cayman", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Hombre"},
+    {"marca": "Bharara", "producto": "Viking Desert", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Hombre"},
+    {"marca": "Bharara", "producto": "Viking Double Black", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Hombre"},
+    {"marca": "Bharara", "producto": "Viking Kashmir", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Hombre"},
+    {"marca": "Bharara", "producto": "Viking Rio", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Hombre"},
+    {"marca": "Carolina Herrera", "producto": "212 VIP Black Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Carolina Herrera", "producto": "212 VIP Rose Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Carolina Herrera", "producto": "212 Sexy Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Carolina Herrera", "producto": "212 VIP Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Carolina Herrera", "producto": "212 VIP Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Carolina Herrera", "producto": "Bad Boy Cobalt Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Carolina Herrera", "producto": "Bad Boy Extreme Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Carolina Herrera", "producto": "Bad Boy Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Carolina Herrera", "producto": "CH Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Carolina Herrera", "producto": "CH Pasión Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Carolina Herrera", "producto": "Good Girl Blush Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Carolina Herrera", "producto": "Good Girl Dazzling Garden", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Carolina Herrera", "producto": "Good Girl Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Carolina Herrera", "producto": "Good Girl Midnight Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Carolina Herrera", "producto": "Good Girl Supreme Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Carolina Herrera", "producto": "Very Good Girl Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Carolina Herrera", "producto": "Very Good Girl Glam Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Chanel", "producto": "Bleu De Chanel Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Chanel", "producto": "Coco Mademoiselle Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Creed", "producto": "Aventus 100ml", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Christian Dior", "producto": "Fahrenheit Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Christian Dior", "producto": "Sauvage Elixir Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Christian Dior", "producto": "Sauvage Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Dolce & Gabbana", "producto": "Light Blue Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Giorgio Armani", "producto": "Acqua Di Gio Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Giorgio Armani", "producto": "Acqua Di Gio Profumo Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Giorgio Armani", "producto": "My Way Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Giorgio Armani", "producto": "Si Passione Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Jean Paul Gaultier", "producto": "Divine Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Jean Paul Gaultier", "producto": "Le Beau Paradise Garden", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Jean Paul Gaultier", "producto": "Le Male Elixir Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Jean Paul Gaultier", "producto": "La Belle Le Parfum Intense", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Jean Paul Gaultier", "producto": "Le Beau Le Parfum Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Jean Paul Gaultier", "producto": "Scandal Absolu Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Jean Paul Gaultier", "producto": "Scandal Absolu Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Jean Paul Gaultier", "producto": "Scandal Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Jean Paul Gaultier", "producto": "Scandal Le Parfum Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Jean Paul Gaultier", "producto": "Scandal Le Parfum Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Jean Paul Gaultier", "producto": "Scandal Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Lattafa", "producto": "Al Nashama Caprice", "detal": 25.0, "mayor": 21.0, "gran_mayor": 19.5, "genero": "Unisex"},
+    {"marca": "Lattafa", "producto": "Affection Unisex", "detal": 25.0, "mayor": 21.0, "gran_mayor": 19.5, "genero": "Unisex"},
+    {"marca": "Lattafa", "producto": "Ajwad Pink to Pink Unisex", "detal": 25.0, "mayor": 21.0, "gran_mayor": 19.5, "genero": "Unisex"},
+    {"marca": "Lattafa", "producto": "Ajwad Unisex", "detal": 25.0, "mayor": 21.0, "gran_mayor": 19.5, "genero": "Unisex"},
+    {"marca": "Lattafa", "producto": "Asad Men", "detal": 25.0, "mayor": 21.0, "gran_mayor": 19.5, "genero": "Hombre"},
+    {"marca": "Lattafa", "producto": "Asad Zanzibar Men", "detal": 25.0, "mayor": 21.0, "gran_mayor": 19.5, "genero": "Hombre"},
+    {"marca": "Lattafa", "producto": "Bade'e Al Oud Honor & Glory", "detal": 25.0, "mayor": 21.0, "gran_mayor": 19.5, "genero": "Unisex"},
+    {"marca": "Lattafa", "producto": "Bade'e Al Oud Sublime Unisex", "detal": 25.0, "mayor": 21.0, "gran_mayor": 19.5, "genero": "Unisex"},
+    {"marca": "Lattafa", "producto": "Eclaire Fem", "detal": 25.0, "mayor": 21.0, "gran_mayor": 19.5, "genero": "Mujer"},
+    {"marca": "Lattafa", "producto": "Fakhar Black Men", "detal": 25.0, "mayor": 21.0, "gran_mayor": 19.5, "genero": "Hombre"},
+    {"marca": "Lattafa", "producto": "Fakhar Extrait Gold Unisex", "detal": 25.0, "mayor": 21.0, "gran_mayor": 19.5, "genero": "Unisex"},
+    {"marca": "Lattafa", "producto": "Fakhar Rose Fem", "detal": 25.0, "mayor": 21.0, "gran_mayor": 19.5, "genero": "Mujer"},
+    {"marca": "Lattafa", "producto": "Hayaati Gold Elixir Unisex", "detal": 25.0, "mayor": 21.0, "gran_mayor": 19.5, "genero": "Unisex"},
+    {"marca": "Lattafa", "producto": "Hayaati Men", "detal": 25.0, "mayor": 21.0, "gran_mayor": 19.5, "genero": "Hombre"},
+    {"marca": "Lattafa", "producto": "Khamrah Qahwa Unisex", "detal": 25.0, "mayor": 21.0, "gran_mayor": 19.5, "genero": "Unisex"},
+    {"marca": "Lattafa", "producto": "Khamrah Unisex", "detal": 25.0, "mayor": 21.0, "gran_mayor": 19.5, "genero": "Unisex"},
+    {"marca": "Lattafa", "producto": "Liam Grey Unisex", "detal": 25.0, "mayor": 21.0, "gran_mayor": 19.5, "genero": "Unisex"},
+    {"marca": "Lattafa", "producto": "Mayar Natural Intense Fem", "detal": 25.0, "mayor": 21.0, "gran_mayor": 19.5, "genero": "Mujer"},
+    {"marca": "Lattafa", "producto": "Mayar Fem", "detal": 25.0, "mayor": 21.0, "gran_mayor": 19.5, "genero": "Mujer"},
+    {"marca": "Lattafa", "producto": "Musamam White Intense", "detal": 25.0, "mayor": 21.0, "gran_mayor": 19.5, "genero": "Unisex"},
+    {"marca": "Lattafa", "producto": "Yara Tous Fem", "detal": 25.0, "mayor": 21.0, "gran_mayor": 19.5, "genero": "Mujer"},
+    {"marca": "Lattafa", "producto": "Yara Moi Fem", "detal": 25.0, "mayor": 21.0, "gran_mayor": 19.5, "genero": "Mujer"},
+    {"marca": "Lattafa", "producto": "Yara Candy Fem", "detal": 25.0, "mayor": 21.0, "gran_mayor": 19.5, "genero": "Mujer"},
+    {"marca": "Lattafa", "producto": "Yara Pink Fem", "detal": 25.0, "mayor": 21.0, "gran_mayor": 19.5, "genero": "Mujer"},
+    {"marca": "Lattafa", "producto": "Yara X3 30ml Set Lujo", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Lattafa", "producto": "Yara X4 30ml Set Lujo", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Louis Vuitton", "producto": "Ombre Nomade Unisex", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Unisex"},
+    {"marca": "Maison Francis Kurkdjian", "producto": "Baccarat Rouge 540 Unisex", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Unisex"},
+    {"marca": "Montblanc", "producto": "Starwalker Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Moschino", "producto": "Funny Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Moschino", "producto": "Toy 2 Pearl Unisex", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Unisex"},
+    {"marca": "Moschino", "producto": "Toy 2 X4 Set Lujo", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Unisex"},
+    {"marca": "Moschino", "producto": "Toy 2 X3 Set Lujo", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Unisex"},
+    {"marca": "Moschino", "producto": "Toy Boy Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Mundus", "producto": "Burj Khalifa Unisex", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Unisex"},
+    {"marca": "Mundus", "producto": "Chichen Itza Unisex", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Unisex"},
+    {"marca": "Mundus", "producto": "Empire State", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Unisex"},
+    {"marca": "Mundus", "producto": "Taj Mahal Unisex", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Unisex"},
+    {"marca": "Mundus", "producto": "Torre Eiffel", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Unisex"},
+    {"marca": "Nautica", "producto": "Voyage", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Orientica", "producto": "Amber Rouge Unisex", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Unisex"},
+    {"marca": "Orientica", "producto": "Royal Amber Unisex", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Unisex"},
+    {"marca": "Orientica", "producto": "Velvet Gold Unisex", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Unisex"},
+    {"marca": "Orientica", "producto": "Arte Bellissimo Romantic Unisex", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Unisex"},
+    {"marca": "Parfums de Marly", "producto": "Delina Exclusif Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Paris Hilton", "producto": "Can Can Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Paris Hilton", "producto": "Heirness Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Paris Hilton", "producto": "Paris Hilton Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Perry Ellis", "producto": "360 Red Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Perry Ellis", "producto": "360 Red Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Perry Ellis", "producto": "360 Very Blue Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Prada", "producto": "Paradoxe Intense Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Rabanne", "producto": "Invictus Victory Elixir Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Rabanne", "producto": "Phantom Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Rabanne", "producto": "Pure XS Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Rabanne", "producto": "Fame Couture Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Rabanne", "producto": "Fame Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Rabanne", "producto": "Fame Parfum Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Rabanne", "producto": "Million Gold Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Rabanne", "producto": "Olympéa Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Rabanne", "producto": "One Million Lucky Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Rabanne", "producto": "One Million Prive Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Rabanne", "producto": "One Million Royal Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Ralph Lauren", "producto": "Ralph Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Ralph Lauren", "producto": "Love Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Swiss Arabian", "producto": "Shaghaf Oud Tonka Unisex", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Unisex"},
+    {"marca": "Swiss Arabian", "producto": "Shaghaf Oud Unisex", "detal": 22.0, "mayor": 18.0, "gran_mayor": 16.5, "genero": "Unisex"},
+    {"marca": "Tom Ford", "producto": "Black Orchid Unisex", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Unisex"},
+    {"marca": "Tom Ford", "producto": "Lost Cherry Unisex", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Unisex"},
+    {"marca": "Tom Ford", "producto": "Ombre Leather Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Tom Ford", "producto": "Tobacco Vanille Unisex", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Unisex"},
+    {"marca": "Tommy Hilfiger", "producto": "Tommy Girl Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Tommy Hilfiger", "producto": "Tommy Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Versace", "producto": "Eros Flame Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Versace", "producto": "Eros Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Versace", "producto": "Eros Pour Femme", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Versace", "producto": "Yellow Diamond Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Versace", "producto": "Bright Crystal Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Victoria's Secret", "producto": "Bombshell Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Viktor & Rolf", "producto": "Flowerbomb Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Viktor & Rolf", "producto": "Spicebomb Night Vision Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Xerjoff", "producto": "Erba Pura Unisex", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Unisex"},
+    {"marca": "Yves Saint Laurent", "producto": "Black Opium Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Yves Saint Laurent", "producto": "Y Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Yves Saint Laurent", "producto": "Y Elixir Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"},
+    {"marca": "Yves Saint Laurent", "producto": "Libre Fem", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Mujer"},
+    {"marca": "Yves Saint Laurent", "producto": "Myslf Men", "detal": 20.0, "mayor": 16.0, "gran_mayor": 14.0, "genero": "Hombre"}
 ]
 
 HTML_TEMPLATE = """
@@ -210,74 +181,86 @@ HTML_TEMPLATE = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catálogo de Fragancias</title>
+    <title>Catálogo Digital de Perfumes</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
-        .header-bg { background: linear-gradient(135deg, #111827, #1f2937); color: #fff; padding: 2rem 1rem; }
-        .card-perfume { border: none; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: transform 0.2s; }
-        .card-perfume:hover { transform: translateY(-3px); }
-        .badge-brand { background-color: #e5e7eb; color: #374151; font-size: 0.75rem; font-weight: 600; }
-        .badge-gender { font-size: 0.7rem; }
+        body { background-color: #f4f6f8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .header-bg { background: linear-gradient(135deg, #111827 0%, #1f2937 100%); color: white; padding: 2.5rem 1rem; text-align: center; border-bottom: 4px solid #d97706; }
+        .card-perfume { border: none; border-radius: 12px; transition: transform 0.2s, box-shadow 0.2s; background: #ffffff; }
+        .card-perfume:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
+        .badge-brand { background-color: #f3f4f6; color: #374151; font-weight: 600; font-size: 0.75rem; padding: 0.35em 0.65em; border-radius: 6px; }
+        .price-box { background-color: #f9fafb; border-radius: 8px; padding: 8px; font-size: 0.85rem; border: 1px solid #e5e7eb; }
+        .price-detal { font-weight: bold; color: #059669; font-size: 1.05rem; }
+        .price-label { color: #6b7280; font-size: 0.75rem; display: block; }
     </style>
 </head>
 <body>
 
-<div class="header-bg text-center mb-4">
-    <h1 class="fw-bold">Catálogo de Fragancias</h1>
-    <p class="mb-0 text-muted">Explora nuestra colección de perfumes disponibles</p>
-</div>
-
-<div class="container mb-5">
-    <!-- Buscador en tiempo real -->
-    <div class="row justify-content-center mb-4">
-        <div class="col-md-6">
-            <input type="text" id="searchInput" class="form-control form-control-lg shadow-sm" placeholder="Buscar por perfume, marca o género..." onkeyup="filterProducts()">
-        </div>
+    <div class="header-bg shadow-sm mb-4">
+        <h1 class="fw-bold m-0">✨ Catálogo de Perfumes</h1>
+        <p class="text-light opacity-75 mt-1 small">Consulta nuestros precios al Detal, Mayor y Gran Mayor</p>
     </div>
 
-    <!-- Lista de Productos -->
-    <div class="row g-3" id="productList">
-        {% for item in catalogo %}
-        <div class="col-6 col-md-4 col-lg-3 product-item" data-search="{{ item.marca.lower() }} {{ item.producto.lower() }} {{ item.genero.lower() }}">
-            <div class="card card-perfume h-100 p-3">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="badge badge-brand text-uppercase">{{ item.marca }}</span>
-                    {% if item.genero == 'Mujer' %}
-                        <span class="badge bg-danger-subtle text-danger badge-gender">Fem</span>
-                    {% elif item.genero == 'Hombre' %}
-                        <span class="badge bg-primary-subtle text-primary badge-gender">Men</span>
-                    {% else %}
-                        <span class="badge bg-warning-subtle text-warning badge-gender">Unisex</span>
-                    {% endif %}
-                </div>
-                <h6 class="card-title fw-bold text-dark mb-2" style="font-size: 0.95rem;">{{ item.producto }}</h6>
-                <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center">
-                    <span class="text-muted small">Precio:</span>
-                    <span class="fw-bold text-success">${{ item.precio if item.precio > 0 else ' Consultar' }}</span>
-                </div>
+    <div class="container pb-5">
+        <div class="row justify-content-center mb-4">
+            <div class="col-12 col-md-8 col-lg-6">
+                <input type="text" id="searchInput" class="form-control form-control-lg shadow-sm" placeholder="🔍 Buscar perfume o marca..." onkeyup="filterProducts()">
             </div>
         </div>
-        {% endfor %}
-    </div>
-</div>
 
-<script>
-function filterProducts() {
-    let input = document.getElementById('searchInput').value.toLowerCase();
-    let items = document.getElementsByClassName('product-item');
-    
-    for (let i = 0; i < items.length; i++) {
-        let searchData = items[i].getAttribute('data-search');
-        if (searchData.includes(input)) {
-            items[i].style.display = "";
-        } else {
-            items[i].style.display = "none";
+        <div class="row g-3" id="productList">
+            {% for item in catalogo %}
+            <div class="col-6 col-md-4 col-lg-3 product-item" data-search="{{ item.marca.lower() }} {{ item.producto.lower() }}">
+                <div class="card card-perfume h-100 p-3 shadow-sm d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge badge-brand text-uppercase">{{ item.marca }}</span>
+                            {% if item.genero == 'Mujer' %}
+                                <span class="badge bg-danger-subtle text-danger" style="font-size:0.7rem;">Mujer</span>
+                            {% elif item.genero == 'Hombre' %}
+                                <span class="badge bg-primary-subtle text-primary" style="font-size:0.7rem;">Hombre</span>
+                            {% else %}
+                                <span class="badge bg-warning-subtle text-warning-emphasis" style="font-size:0.7rem;">Unisex</span>
+                            {% endif %}
+                        </div>
+                        <h6 class="card-title fw-bold text-dark mb-3" style="font-size: 0.95rem; min-height: 2.4em;">{{ item.producto }}</h6>
+                    </div>
+
+                    <div class="price-box mt-auto">
+                        <div class="d-flex justify-content-between align-items-center mb-1 pb-1 border-bottom">
+                            <span class="price-label">Detal:</span>
+                            <span class="price-detal">${{ "%.2f"|format(item.detal) }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="price-label">Al Mayor:</span>
+                            <span class="fw-bold text-dark">${{ "%.2f"|format(item.mayor) }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="price-label">Gran Mayor:</span>
+                            <span class="fw-bold text-primary">${{ "%.2f"|format(item.gran_mayor) }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+    function filterProducts() {
+        let input = document.getElementById('searchInput').value.toLowerCase();
+        let items = document.getElementsByClassName('product-item');
+
+        for (let i = 0; i < items.length; i++) {
+            let searchData = items[i].getAttribute('data-search');
+            if (searchData.includes(input)) {
+                items[i].style.display = "";
+            } else {
+                items[i].style.display = "none";
+            }
         }
     }
-}
-</script>
-
+    </script>
 </body>
 </html>
 """
@@ -286,9 +269,6 @@ function filterProducts() {
 def home():
     return render_template_string(HTML_TEMPLATE, catalogo=CATALOGO)
 
-import os
-
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-
