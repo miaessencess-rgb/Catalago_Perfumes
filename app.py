@@ -8,25 +8,31 @@ def cargar_catalogo():
     df = pd.read_excel('aroma2.xlsx', sheet_name='catalogo')
     catalogo = []
     
+    # Ruta absoluta a la carpeta de fotos para que Linux no se pierda
+    ruta_carpeta = os.path.join(app.root_path, 'static', 'fotos')
+    
     for _, row in df.iterrows():
         nombre = str(row['Nombre'])
-        marca = str(row['marca']).strip() # Espacio corregido
+        marca = str(row['marca']).strip()
         
         detal = float(row['precio_venta']) if pd.notna(row['precio_venta']) else 0.0
         mayor = float(row['precio_mayor']) if pd.notna(row['precio_mayor']) else 0.0
         gran_mayor = float(row['precio_gran_mayor']) if pd.notna(row['precio_gran_mayor']) else 0.0
         
-        # LÓGICA INTELIGENTE: Busca la imagen en static/fotos en cualquier formato
+        # Generar el nombre base (slug) sin espacios ni caracteres raros
         slug = nombre.lower().replace(' ', '-').replace("'", "").replace('"', '').replace('&', 'and')
         
-        # Revisa si la foto existe en .jpg, .png, .jpeg o .webp
-        formatos = ['.jpg', '.png', '.jpeg', '.webp', '.JPG', '.PNG']
-        imagen = f"/static/fotos/{slug}.jpg" # Valor por defecto
-        for ext in formatos:
-            ruta_prueba = f"static/fotos/{slug}{ext}"
-            if os.path.exists(ruta_prueba):
-                imagen = f"/static/fotos/{slug}{ext}"
-                break
+        # Imagen por defecto si no se encuentra ninguna
+        imagen = f"/static/fotos/{slug}.jpg" 
+        
+        # BÚSQUEDA INTELIGENTE Y A PRUEBA DE FALLOS (Ignora mayúsculas/minúsculas en la extensión)
+        if os.path.exists(ruta_carpeta):
+            for archivo in os.listdir(ruta_carpeta):
+                nombre_archivo, extension = os.path.splitext(archivo)
+                # Si el nombre coincide y es una imagen, la usa
+                if nombre_archivo == slug and extension.lower() in ['.jpg', '.jpeg', '.png', '.webp']:
+                    imagen = f"/static/fotos/{archivo}" # Usa el nombre exacto del archivo encontrado
+                    break
         
         nombre_lower = nombre.lower()
         genero = 'Unisex'
