@@ -46,9 +46,9 @@ HTML_TEMPLATE = """
     <title>Catálogo Digital de Perfumes</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #f4f6f8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .header-bg { background: linear-gradient(135deg, #111827 0%, #1f2937 100%); color: white; padding-bottom: 1.5rem; text-align: center; border-bottom: 4px solid #d97706; }
-        .banner-img { width: 100%; height: 220px; object-fit: cover; margin-bottom: 15px; border-radius: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        body { background-color: #f4f6f8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
+        .header-bg { background: linear-gradient(135deg, #111827 0%, #1f2937 100%); color: white; padding: 0 0 1.5rem 0; text-align: center; border-bottom: 4px solid #d97706; }
+        .banner-img { width: 100%; height: 250px; object-fit: cover; margin-bottom: 15px; border-radius: 0; display: block; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
         .card-perfume { border: none; border-radius: 12px; transition: transform 0.2s, box-shadow 0.2s; background: #ffffff; }
         .card-perfume:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
         .badge-brand { background-color: #f3f4f6; color: #374151; font-weight: 600; font-size: 0.75rem; padding: 0.35em 0.65em; border-radius: 6px; }
@@ -62,7 +62,7 @@ HTML_TEMPLATE = """
 <body>
 
     <div class="header-bg shadow-sm mb-4">
-        <!-- Banner de lado a lado cubriendo todo el ancho -->
+        <!-- Banner 100% ancho, sin márgenes -->
         <img src="{{ url_for('static', filename='fotos/banner.jpg') }}" alt="Aroma2 Banner" class="banner-img" onerror="this.style.display='none';">
         <div class="px-3">
             <h1 class="fw-bold m-0">✨ Catálogo de Perfumes</h1>
