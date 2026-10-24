@@ -46,7 +46,7 @@ HTML_TEMPLATE = """
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #f4f6f8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .header-bg { background: linear-gradient(135deg, #111827 0%, #1f2937 100%); color: white; padding: 2.5rem 1rem; text-align: center; border-bottom: 4px solid #d97706; }
+        .header-bg { background: linear-gradient(135deg, #111827 0%, #1f2937 100%); color: white; padding: 2rem 1rem; text-align: center; border-bottom: 4px solid #d97706; }
         .card-perfume { border: none; border-radius: 12px; transition: transform 0.2s, box-shadow 0.2s; background: #ffffff; }
         .card-perfume:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
         .badge-brand { background-color: #f3f4f6; color: #374151; font-weight: 600; font-size: 0.75rem; padding: 0.35em 0.65em; border-radius: 6px; }
@@ -60,8 +60,8 @@ HTML_TEMPLATE = """
 <body>
 
     <div class="header-bg shadow-sm mb-4">
-        <!-- Banner apuntando correctamente a static/fotos/banner.jpg -->
-        <img src="{{ url_for('static', filename='fotos/banner.jpg') }}" alt="Aroma2 Banner" style="max-height: 80px; width: auto; margin-bottom: 15px; border-radius: 8px;" onerror="this.style.display='none';">
+        <!-- Banner ajustado en tamaño grande y elegante -->
+        <img src="{{ url_for('static', filename='fotos/banner.jpg') }}" alt="Aroma2 Banner" style="width: 100%; max-height: 180px; object-fit: cover; margin-bottom: 15px; border-radius: 8px;" onerror="this.style.display='none';">
         
         <h1 class="fw-bold m-0">✨ Catálogo de Perfumes</h1>
         <p class="text-light opacity-75 mt-1 small">Detal, Mayor (6+ unds) y Gran Mayor (15+ unds)</p>
@@ -145,3 +145,4 @@ def home():
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+ 
