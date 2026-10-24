@@ -1,11 +1,10 @@
 import os
 import pandas as pd
-from flask import Flask, render_template_string
+from flask import Flask, render_template_string, url_for
 
 app = Flask(__name__)
 
 def cargar_catalogo():
-    # Lee directamente el archivo Excel de tu repositorio
     df = pd.read_excel('aroma2.xlsx', sheet_name='catalogo')
     catalogo = []
     
@@ -16,11 +15,9 @@ def cargar_catalogo():
         mayor = float(row['precio_mayor'])
         gran_mayor = float(row['precio_gran_mayor'])
         
-        # Genera el enlace de la foto automáticamente basado en el nombre del perfume
         slug = nombre.lower().replace(' ', '-').replace("'", "").replace('"', '').replace('&', 'and')
         imagen = f"/static/fotos/{slug}.jpg"
         
-        # Detección automática de género
         nombre_lower = nombre.lower()
         genero = 'Unisex'
         if any(w in nombre_lower for w in ['men', 'man', 'hombre', 'sauvage', 'eros', 'bleu', 'one million', 'bad boy', 'elixir']):
@@ -63,8 +60,8 @@ HTML_TEMPLATE = """
 <body>
 
     <div class="header-bg shadow-sm mb-4">
-        <!-- Banner o Logotipo ubicado en /static/banner.jpg -->
-        <img src="/static/banner.jpg" alt="Aroma2 Banner" style="max-height: 80px; width: auto; margin-bottom: 15px; border-radius: 8px;" onerror="this.style.display='none';">
+        <!-- Banner apuntando correctamente a static/fotos/banner.jpg -->
+        <img src="{{ url_for('static', filename='fotos/banner.jpg') }}" alt="Aroma2 Banner" style="max-height: 80px; width: auto; margin-bottom: 15px; border-radius: 8px;" onerror="this.style.display='none';">
         
         <h1 class="fw-bold m-0">✨ Catálogo de Perfumes</h1>
         <p class="text-light opacity-75 mt-1 small">Detal, Mayor (6+ unds) y Gran Mayor (15+ unds)</p>
