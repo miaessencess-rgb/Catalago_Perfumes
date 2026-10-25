@@ -211,13 +211,8 @@ HTML_TEMPLATE = """
                         </div>
                         
                         {% if item.stock > 0 %}
-                            <!-- CORREGIDO: Usamos data-attributes para evitar el error de los apóstrofes -->
-                            <button class="btn btn-outline-dark btn-sm w-100 fw-bold btn-add-cart" 
-                                    data-nombre="{{ item.producto }}" 
-                                    data-detal="{{ item.detal }}" 
-                                    data-mayor="{{ item.mayor }}" 
-                                    data-granmayor="{{ item.gran_mayor }}"
-                                    style="border-radius: 8px;">
+                            <!-- CORREGIDO: Usamos el filtro tojson para escapar comillas y apóstrofes -->
+                            <button onclick='addToCart({{ {"nombre": item.producto, "detal": item.detal, "mayor": item.mayor, "gran_mayor": item.gran_mayor} | tojson }})' class="btn btn-outline-dark btn-sm w-100 fw-bold" style="border-radius: 8px;">
                                ➕ Agregar al Pedido
                             </button>
                         {% else %}
@@ -236,7 +231,7 @@ HTML_TEMPLATE = """
     <!-- Notificación Toast -->
     <div id="toast" class="toast-notification">✅ Producto agregado al carrito</div>
 
-    <!-- Botón flotante del carrito (SIEMPRE VISIBLE) -->
+    <!-- Botón flotante del carrito -->
     <div id="cartButton" class="cart-float" onclick="sendOrder(event)">
         🛒
         <span id="cartCount" class="cart-badge">0</span>
@@ -253,7 +248,6 @@ HTML_TEMPLATE = """
         }
     }
 
-    // Lógica del Carrito
     let cart = [];
     
     function updateCartUI() {
@@ -268,12 +262,13 @@ HTML_TEMPLATE = """
         setTimeout(() => { toast.classList.remove('show'); }, 2000);
     }
 
-    function addToCart(nombre, detal, mayor, gran_mayor) {
-        let existingItem = cart.find(item => item.nombre === nombre);
+    function addToCart(producto) {
+        let existingItem = cart.find(item => item.nombre === producto.nombre);
         if (existingItem) {
             existingItem.qty += 1;
         } else {
-            cart.push({ nombre: nombre, detal: parseFloat(detal), mayor: parseFloat(mayor), gran_mayor: parseFloat(gran_mayor), qty: 1 });
+            producto.qty = 1;
+            cart.push(producto);
         }
         updateCartUI();
         showToast();
@@ -286,10 +281,8 @@ HTML_TEMPLATE = """
             return;
         }
         
-        // 1. Calcular el total de unidades en TODO el carrito
         let totalUnidades = cart.reduce((sum, item) => sum + item.qty, 0);
         
-        // 2. Determinar qué precio aplicar a TODOS los productos
         let tipoPrecio = "Detal";
         if (totalUnidades >= 15) {
             tipoPrecio = "Gran Mayor";
@@ -317,23 +310,9 @@ HTML_TEMPLATE = """
         let url = "https://wa.me/584228490047?text=" + encodeURIComponent(mensaje);
         window.location.href = url;
         
-        // Limpiar carrito después de enviar
         cart = [];
         updateCartUI();
     }
-
-    // Asignar el evento a todos los botones de agregar
-    document.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('.btn-add-cart').forEach(button => {
-            button.addEventListener('click', function() {
-                let nombre = this.getAttribute('data-nombre');
-                let detal = this.getAttribute('data-detal');
-                let mayor = this.getAttribute('data-mayor');
-                let gran_mayor = this.getAttribute('data-granmayor');
-                addToCart(nombre, detal, mayor, gran_mayor);
-            });
-        });
-    });
     </script>
 </body>
 </html>
