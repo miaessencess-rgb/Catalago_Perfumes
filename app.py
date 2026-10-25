@@ -211,8 +211,13 @@ HTML_TEMPLATE = """
                         </div>
                         
                         {% if item.stock > 0 %}
-                            <!-- CORREGIDO: Usamos el filtro tojson para escapar comillas y apóstrofes -->
-                            <button onclick='addToCart({{ {"nombre": item.producto, "detal": item.detal, "mayor": item.mayor, "gran_mayor": item.gran_mayor} | tojson }})' class="btn btn-outline-dark btn-sm w-100 fw-bold" style="border-radius: 8px;">
+                            <!-- Usamos data-attributes para no romper el HTML con apóstrofes -->
+                            <button class="btn btn-outline-dark btn-sm w-100 fw-bold btn-add-cart" 
+                                    data-nombre="{{ item.producto }}" 
+                                    data-detal="{{ item.detal }}" 
+                                    data-mayor="{{ item.mayor }}" 
+                                    data-granmayor="{{ item.gran_mayor }}"
+                                    style="border-radius: 8px;">
                                ➕ Agregar al Pedido
                             </button>
                         {% else %}
@@ -238,76 +243,107 @@ HTML_TEMPLATE = """
     </div>
 
     <script>
+    // Funciones básicas (ES5) para máxima compatibilidad en celulares
+    
     function filterProducts() {
-        let input = document.getElementById('searchInput').value.toLowerCase();
-        let items = document.getElementsByClassName('product-item');
-        for (let i = 0; i < items.length; i++) {
-            let searchData = items[i].getAttribute('data-search');
-            if (searchData.includes(input)) { items[i].style.display = ""; } 
-            else { items[i].style.display = "none"; }
+        var input = document.getElementById('searchInput').value.toLowerCase();
+        var items = document.getElementsByClassName('product-item');
+        for (var i = 0; i < items.length; i++) {
+            var searchData = items[i].getAttribute('data-search');
+            if (searchData.indexOf(input) > -1) { 
+                items[i].style.display = ""; 
+            } else { 
+                items[i].style.display = "none"; 
+            }
         }
     }
 
-    let cart = [];
+    var cart = [];
     
     function updateCartUI() {
-        let totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
-        let badge = document.getElementById('cartCount');
-        badge.innerText = totalItems;
+        var totalItems = 0;
+        for (var i = 0; i < cart.length; i++) {
+            totalItems += cart[i].qty;
+        }
+        var badge = document.getElementById('cartCount');
+        if (badge) badge.innerText = totalItems;
     }
 
     function showToast() {
-        let toast = document.getElementById('toast');
-        toast.classList.add('show');
-        setTimeout(() => { toast.classList.remove('show'); }, 2000);
-    }
-
-    function addToCart(producto) {
-        let existingItem = cart.find(item => item.nombre === producto.nombre);
-        if (existingItem) {
-            existingItem.qty += 1;
-        } else {
-            producto.qty = 1;
-            cart.push(producto);
+        var toast = document.getElementById('toast');
+        if (toast) {
+            toast.classList.add('show');
+            setTimeout(function() { toast.classList.remove('show'); }, 2000);
         }
-        updateCartUI();
-        showToast();
     }
 
+    // Escuchar los clics en toda la página (Event Delegation)
+    document.addEventListener('click', function(e) {
+        // Si se hizo clic en un botón de "Agregar"
+        if (e.target && e.target.classList.contains('btn-add-cart')) {
+            var btn = e.target;
+            var nombre = btn.getAttribute('data-nombre');
+            var detal = parseFloat(btn.getAttribute('data-detal'));
+            var mayor = parseFloat(btn.getAttribute('data-mayor'));
+            var gran_mayor = parseFloat(btn.getAttribute('data-granmayor'));
+
+            var found = false;
+            for (var i = 0; i < cart.length; i++) {
+                if (cart[i].nombre === nombre) {
+                    cart[i].qty += 1;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                cart.push({ nombre: nombre, detal: detal, mayor: mayor, gran_mayor: gran_mayor, qty: 1 });
+            }
+            
+            updateCartUI();
+            showToast();
+        }
+    });
+
+    // Función para enviar el pedido (se llama desde el HTML)
     function sendOrder(event) {
-        event.preventDefault();
+        if(event) event.preventDefault();
+        
         if (cart.length === 0) {
             alert("Tu carrito está vacío. Agrega algún perfume primero.");
             return;
         }
         
-        let totalUnidades = cart.reduce((sum, item) => sum + item.qty, 0);
+        var totalUnidades = 0;
+        for (var i = 0; i < cart.length; i++) {
+            totalUnidades += cart[i].qty;
+        }
         
-        let tipoPrecio = "Detal";
+        var tipoPrecio = "Detal";
         if (totalUnidades >= 15) {
             tipoPrecio = "Gran Mayor";
         } else if (totalUnidades >= 6) {
             tipoPrecio = "Mayor";
         }
         
-        let mensaje = "Hola, quiero hacer el siguiente pedido (" + tipoPrecio + "):\n\n";
-        let totalPagar = 0;
+        var mensaje = "Hola, quiero hacer el siguiente pedido (" + tipoPrecio + "):\n\n";
+        var totalPagar = 0;
         
-        cart.forEach(item => {
-            let precioUnitario = item.detal;
+        for (var i = 0; i < cart.length; i++) {
+            var item = cart[i];
+            var precioUnitario = item.detal;
             if (tipoPrecio === "Gran Mayor") precioUnitario = item.gran_mayor;
             else if (tipoPrecio === "Mayor") precioUnitario = item.mayor;
             
-            let subtotal = precioUnitario * item.qty;
+            var subtotal = precioUnitario * item.qty;
             totalPagar += subtotal;
             
             mensaje += "- " + item.qty + "x " + item.nombre + " ($" + precioUnitario.toFixed(2) + " c/u) = $" + subtotal.toFixed(2) + "\n";
-        });
+        }
         
         mensaje += "\n*Total estimado: $" + totalPagar.toFixed(2) + "*";
         mensaje += "\n\nPor favor, confírmame disponibilidad y método de pago.";
         
-        let url = "https://wa.me/584228490047?text=" + encodeURIComponent(mensaje);
+        var url = "https://wa.me/584228490047?text=" + encodeURIComponent(mensaje);
         window.location.href = url;
         
         cart = [];
