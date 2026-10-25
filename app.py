@@ -220,10 +220,10 @@ HTML_TEMPLATE = """
     </div>
 
     <!-- Botón flotante del carrito -->
-    <a href="#" id="cartButton" class="cart-float d-none" onclick="sendOrder()">
+    <div id="cartButton" class="cart-float d-none" onclick="sendOrder(event)">
         🛒
         <span id="cartCount" class="cart-badge">0</span>
-    </a>
+    </div>
 
     <script>
     function filterProducts() {
@@ -236,8 +236,8 @@ HTML_TEMPLATE = """
         }
     }
 
-    // Lógica del Carrito
-    let cart = JSON.parse(localStorage.getItem('aroma_cart')) || [];
+    // Lógica del Carrito (Ahora en memoria, se borra al refrescar)
+    let cart = [];
     
     function updateCartUI() {
         let totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
@@ -259,11 +259,11 @@ HTML_TEMPLATE = """
         } else {
             cart.push({ nombre: nombre, detal: parseFloat(detal), mayor: parseFloat(mayor), gran_mayor: parseFloat(gran_mayor), qty: 1 });
         }
-        localStorage.setItem('aroma_cart', JSON.stringify(cart));
         updateCartUI();
     }
 
-    function sendOrder() {
+    function sendOrder(event) {
+        event.preventDefault();
         if (cart.length === 0) return;
         
         // 1. Calcular el total de unidades en TODO el carrito
@@ -277,7 +277,8 @@ HTML_TEMPLATE = """
             tipoPrecio = "Mayor";
         }
         
-        let mensaje = `Hola, quiero hacer el siguiente pedido (${tipoPrecio}):\\n\\n`;
+        // CORREGIDO: Saltos de línea reales con \n
+        let mensaje = "Hola, quiero hacer el siguiente pedido (" + tipoPrecio + "):\n\n";
         let totalPagar = 0;
         
         cart.forEach(item => {
@@ -288,17 +289,17 @@ HTML_TEMPLATE = """
             let subtotal = precioUnitario * item.qty;
             totalPagar += subtotal;
             
-            mensaje += `- ${item.qty}x ${item.nombre} ($${precioUnitario.toFixed(2)} c/u) = $${subtotal.toFixed(2)}\\n`;
+            mensaje += "- " + item.qty + "x " + item.nombre + " ($" + precioUnitario.toFixed(2) + " c/u) = $" + subtotal.toFixed(2) + "\n";
         });
         
-        mensaje += `\\n*Total estimado: $${totalPagar.toFixed(2)}*`;
-        mensaje += "\\n\\nPor favor, confírmame disponibilidad y método de pago.";
+        mensaje += "\n*Total estimado: $" + totalPagar.toFixed(2) + "*";
+        mensaje += "\n\nPor favor, confírmame disponibilidad y método de pago.";
         
         let url = "https://wa.me/584228490047?text=" + encodeURIComponent(mensaje);
-        window.open(url, '_blank');
+        
+        // CORREGIDO: Usar window.location.href evita el bloqueador de ventanas emergentes
+        window.location.href = url;
     }
-
-    document.addEventListener('DOMContentLoaded', updateCartUI);
     </script>
 </body>
 </html>
