@@ -126,6 +126,7 @@ HTML_TEMPLATE = """
         .btn-whatsapp:hover { background-color: #1ebe57; color: white; }
         .btn-agotado { background-color: #6c757d; color: white; font-weight: bold; border: none; cursor: not-allowed; }
         
+        /* Carrito Flotante */
         .cart-float {
             position: fixed; bottom: 20px; right: 20px; z-index: 1000;
             background-color: #25D366; color: white; border-radius: 50%;
@@ -139,6 +140,15 @@ HTML_TEMPLATE = """
             background-color: #dc3545; color: white; border-radius: 50%;
             padding: 0.25em 0.6em; font-size: 0.8rem; font-weight: bold;
         }
+
+        /* Notificación Toast */
+        .toast-notification {
+            position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+            background-color: #333; color: white; padding: 10px 20px;
+            border-radius: 20px; font-size: 0.9rem; z-index: 2000;
+            opacity: 0; transition: opacity 0.3s; pointer-events: none;
+        }
+        .toast-notification.show { opacity: 1; }
     </style>
 </head>
 <body>
@@ -219,8 +229,11 @@ HTML_TEMPLATE = """
         </div>
     </div>
 
-    <!-- Botón flotante del carrito -->
-    <div id="cartButton" class="cart-float d-none" onclick="sendOrder(event)">
+    <!-- Notificación Toast -->
+    <div id="toast" class="toast-notification">Producto agregado al carrito ✅</div>
+
+    <!-- Botón flotante del carrito (SIEMPRE VISIBLE) -->
+    <div id="cartButton" class="cart-float" onclick="sendOrder(event)">
         🛒
         <span id="cartCount" class="cart-badge">0</span>
     </div>
@@ -236,20 +249,19 @@ HTML_TEMPLATE = """
         }
     }
 
-    // Lógica del Carrito (Ahora en memoria, se borra al refrescar)
+    // Lógica del Carrito
     let cart = [];
     
     function updateCartUI() {
         let totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
-        let btn = document.getElementById('cartButton');
         let badge = document.getElementById('cartCount');
-        
-        if (totalItems > 0) {
-            btn.classList.remove('d-none');
-            badge.innerText = totalItems;
-        } else {
-            btn.classList.add('d-none');
-        }
+        badge.innerText = totalItems;
+    }
+
+    function showToast() {
+        let toast = document.getElementById('toast');
+        toast.classList.add('show');
+        setTimeout(() => { toast.classList.remove('show'); }, 2000);
     }
 
     function addToCart(nombre, detal, mayor, gran_mayor) {
@@ -260,11 +272,15 @@ HTML_TEMPLATE = """
             cart.push({ nombre: nombre, detal: parseFloat(detal), mayor: parseFloat(mayor), gran_mayor: parseFloat(gran_mayor), qty: 1 });
         }
         updateCartUI();
+        showToast();
     }
 
     function sendOrder(event) {
         event.preventDefault();
-        if (cart.length === 0) return;
+        if (cart.length === 0) {
+            alert("Tu carrito está vacío. Agrega algún perfume primero.");
+            return;
+        }
         
         // 1. Calcular el total de unidades en TODO el carrito
         let totalUnidades = cart.reduce((sum, item) => sum + item.qty, 0);
@@ -277,7 +293,6 @@ HTML_TEMPLATE = """
             tipoPrecio = "Mayor";
         }
         
-        // CORREGIDO: Saltos de línea reales con \n
         let mensaje = "Hola, quiero hacer el siguiente pedido (" + tipoPrecio + "):\n\n";
         let totalPagar = 0;
         
@@ -297,9 +312,16 @@ HTML_TEMPLATE = """
         
         let url = "https://wa.me/584228490047?text=" + encodeURIComponent(mensaje);
         
-        // CORREGIDO: Usar window.location.href evita el bloqueador de ventanas emergentes
+        // Abrir WhatsApp
         window.location.href = url;
+        
+        // Limpiar carrito después de enviar
+        cart = [];
+        updateCartUI();
     }
+
+    // Inicializar el carrito al cargar la página
+    document.addEventListener('DOMContentLoaded', updateCartUI);
     </script>
 </body>
 </html>
