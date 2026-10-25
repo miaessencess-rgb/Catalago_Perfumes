@@ -6,13 +6,12 @@ import io
 
 app = Flask(__name__)
 
-# ⚠️ PEGA AQUÍ TU ENLACE CSV (Borra cualquier espacio o símbolo invisible antes del https)
+# ⚠️ PEGA AQUÍ TU ENLACE CSV
 URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRAPuJtY8lL5Ikn-aOZpSiHyUz9slXX7a2AYtBCdDXBMeOfWQbuawPFrYMZbzQJ3GsYuXFaHDs3FiwA/pub?gid=1300626180&single=true&output=csv"
 
 def limpiar_precio(val):
     try:
         if pd.isna(val) or val == '': return 0.0
-        # Quita el símbolo de $, espacios y cambia comas por puntos
         limpio = str(val).replace('$', '').replace(' ', '').replace(',', '.').strip()
         return float(limpio)
     except:
@@ -35,7 +34,6 @@ def cargar_catalogo():
             data = response.read().decode('utf-8')
         
         df = pd.read_csv(io.StringIO(data))
-        # Limpiar los nombres de las columnas (quita espacios invisibles)
         df.columns = df.columns.str.strip()
         
         ruta_carpeta = os.path.join(app.root_path, 'static', 'fotos')
@@ -47,7 +45,6 @@ def cargar_catalogo():
             if not nombre or nombre == 'nan':
                 continue
 
-            # Usamos las funciones seguras
             detal = limpiar_precio(row.get('precio_venta', 0))
             mayor = limpiar_precio(row.get('precio_mayor', 0))
             gran_mayor = limpiar_precio(row.get('precio_gran_mayor', 0))
@@ -55,14 +52,15 @@ def cargar_catalogo():
             
             slug = nombre.lower().replace(' ', '-').replace("'", "").replace('"', '').replace('&', 'and')
             
-            # --- BÚSQUEDA INTELIGENTE DE IMAGEN ---
+            # --- BÚSQUEDA ULTRA INTELIGENTE (IGNORA LA EXTENSIÓN) ---
             imagen = f"/static/fotos/{slug}.jpg" # Valor por defecto
             
             if os.path.exists(ruta_carpeta):
                 for archivo in os.listdir(ruta_carpeta):
+                    # Separamos el nombre de la extensión
                     nombre_archivo, extension = os.path.splitext(archivo)
-                    # Comprueba si el nombre coincide y si la extensión es una imagen válida
-                    if nombre_archivo == slug and extension.lower() in ['.jpg', '.jpeg', '.png', '.webp']:
+                    # Si el nombre base coincide (ignorando mayúsculas/minúsculas), ¡lo agarra!
+                    if nombre_archivo.lower() == slug.lower():
                         imagen = f"/static/fotos/{archivo}"
                         break
             
@@ -116,7 +114,7 @@ HTML_TEMPLATE = """
             margin-bottom: 15px;
             border-radius: 50%; 
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            border: 4px solid #FFD700; /* Borde Dorado */
+            border: 4px solid #FFD700;
             background-color: #000; 
         }
 
