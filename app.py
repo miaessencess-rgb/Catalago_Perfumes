@@ -69,14 +69,15 @@ HTML_TEMPLATE = """
 
         /* Estilo para que el logo se vea bien */
         .logo-header {
-            max-height: 110px;
-            max-width: 100%;
-            object-fit: contain;
-            margin-bottom: 15px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-        }
-
+    width: 120px;
+    height: 120px;
+    object-fit: cover; /* Recorta la imagen para que llene el círculo sin deformarse */
+    margin-bottom: 15px;
+    border-radius: 50%; /* Esto lo hace 100% redondo */
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    border: 3px solid #d97706; /* Un borde dorado que combina con tu página */
+    background-color: #000; /* Fondo negro por si el logo tiene transparencias */
+}
         .card-perfume { border: none; border-radius: 12px; transition: transform 0.2s, box-shadow 0.2s; background: #ffffff; }
         .card-perfume:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
         .badge-brand { background-color: #f3f4f6; color: #374151; font-weight: 600; font-size: 0.75rem; padding: 0.35em 0.65em; border-radius: 6px; }
