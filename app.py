@@ -6,7 +6,7 @@ import io
 
 app = Flask(__name__)
 
-# ⚠️ PEGA AQUÍ TU ENLACE CSV
+# ⚠️ TU ENLACE CSV
 URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRAPuJtY8lL5Ikn-aOZpSiHyUz9slXX7a2AYtBCdDXBMeOfWQbuawPFrYMZbzQJ3GsYuXFaHDs3FiwA/pub?gid=1300626180&single=true&output=csv"
 
 def limpiar_precio(val):
@@ -88,13 +88,15 @@ HTML_TEMPLATE = """
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catálogo Digital de Perfumes</title>
+    <title>Catálogo Digital de Perfumes | Aroma2</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Iconos para las redes sociales -->
+    <!-- Iconos para TikTok -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tipografía Premium -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <style>
-        body { background-color: #f4f6f8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
+        body { background-color: #f4f6f8; font-family: 'Poppins', sans-serif; margin: 0; padding: 0; }
         
         .header-bg { 
             background: linear-gradient(rgba(17, 24, 39, 0.7), rgba(17, 24, 39, 0.7)), url("{{ url_for('static', filename='fotos/banner.jpg') }}");
@@ -113,59 +115,79 @@ HTML_TEMPLATE = """
             border: 4px solid #FFD700; background-color: #000; 
         }
 
-        /* Estilo del botón de TikTok */
+        /* Botón de TikTok elegante */
         .tiktok-btn {
-            background-color: #000;
+            background-color: rgba(0, 0, 0, 0.8);
             color: #fff;
             text-decoration: none;
-            padding: 8px 20px;
-            border-radius: 25px;
-            font-weight: bold;
+            padding: 8px 24px;
+            border-radius: 30px;
+            font-weight: 600;
             font-size: 0.9rem;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            border: 2px solid #25F4EE; /* Azul TikTok */
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border: 2px solid #FFD700; /* Borde dorado */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
             transition: all 0.3s ease;
-            margin-top: 10px;
+            margin-top: 15px;
         }
         .tiktok-btn:hover {
-            background-color: #111;
-            color: #FE2C55; /* Rojo TikTok */
-            border-color: #FE2C55;
-            transform: scale(1.05);
+            background-color: #FFD700;
+            color: #000;
+            transform: translateY(-2px);
+        }
+
+        /* Barra de búsqueda tipo píldora */
+        .search-pill {
+            border-radius: 50px !important;
+            border: none;
+            padding: 15px 25px;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .search-pill:focus {
+            box-shadow: 0 4px 20px rgba(217, 119, 6, 0.2);
+            outline: none;
         }
 
         .card-perfume { border: none; border-radius: 12px; transition: transform 0.2s, box-shadow 0.2s; background: #ffffff; }
-        .card-perfume:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
+        .card-perfume:hover { transform: translateY(-5px); box-shadow: 0 12px 25px rgba(0,0,0,0.1); }
+        
         .badge-brand { background-color: #f3f4f6; color: #374151; font-weight: 600; font-size: 0.75rem; padding: 0.35em 0.65em; border-radius: 6px; }
-        .price-box { background-color: #f9fafb; border-radius: 8px; padding: 8px; font-size: 0.85rem; border: 1px solid #e5e7eb; }
-        .price-detal { font-weight: bold; color: #059669; font-size: 1.05rem; }
+        
+        /* Caja de precios más limpia */
+        .price-box { 
+            background-color: #f8f9fa; 
+            border-radius: 10px; 
+            padding: 12px; 
+            border: none; 
+        }
+        .price-detal { font-weight: 700; color: #059669; font-size: 1.1rem; }
         .price-label { color: #6b7280; font-size: 0.75rem; display: block; }
+        
         .img-container { height: 140px; display: flex; align-items: center; justify-content: center; background-color: #fafafa; border-radius: 8px; overflow: hidden; margin-bottom: 10px; }
         .img-container img { max-height: 100%; max-width: 100%; object-fit: contain; }
         
         .card-agotado { opacity: 0.7; filter: grayscale(80%); }
         .badge-agotado { position: absolute; top: 20px; right: 20px; background-color: #dc3545; color: white; font-weight: bold; font-size: 0.8rem; padding: 0.4em 0.7em; border-radius: 6px; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 
-        .btn-whatsapp { background-color: #25D366; color: white; font-weight: bold; border: none; }
-        .btn-whatsapp:hover { background-color: #1ebe57; color: white; }
-        .btn-agotado { background-color: #6c757d; color: white; font-weight: bold; border: none; cursor: not-allowed; }
+        .btn-whatsapp { background-color: #25D366; color: white; font-weight: 600; border: none; border-radius: 8px; transition: 0.2s; }
+        .btn-whatsapp:hover { background-color: #1ebe57; color: white; transform: scale(1.02); }
+        .btn-agotado { background-color: #6c757d; color: white; font-weight: 600; border: none; cursor: not-allowed; border-radius: 8px; }
     </style>
 </head>
 <body>
 
     <div class="header-bg shadow-sm mb-4">
         <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Mi Logo" class="logo-header">
-        <h1 class="fw-bold m-0">✨ Catálogo de Perfumes</h1>
-        <p class="text-light opacity-75 mt-1 small">Detal, Mayor (6+ unds) y Gran Mayor (15+ unds)</p>
+        <h1 class="fw-bold m-0" style="letter-spacing: 1px;">✨ Catálogo de Perfumes</h1>
+        <p class="text-light opacity-75 mt-2 small" style="font-weight: 300;">Detal, Mayor (6+ unds) y Gran Mayor (15+ unds)</p>
         
-        <!-- AQUÍ ESTÁ EL BOTÓN DE TIKTOK -->
+        <!-- BOTÓN DE TIKTOK -->
         <a href="https://www.tiktok.com/@aroma2s" target="_blank" class="tiktok-btn">
             <i class="fab fa-tiktok"></i> Síguenos en TikTok: @aroma2s
         </a>
-        
     </div>
 
     <div class="container pb-5">
@@ -175,9 +197,9 @@ HTML_TEMPLATE = """
         </div>
         {% endif %}
 
-        <div class="row justify-content-center mb-4">
+        <div class="row justify-content-center mb-5">
             <div class="col-12 col-md-8 col-lg-6">
-                <input type="text" id="searchInput" class="form-control form-control-lg shadow-sm" placeholder="🔍 Buscar perfume o marca..." onkeyup="filterProducts()">
+                <input type="text" id="searchInput" class="form-control search-pill" placeholder="🔍 Buscar perfume o marca..." onkeyup="filterProducts()">
             </div>
         </div>
 
@@ -205,8 +227,9 @@ HTML_TEMPLATE = """
                         <div class="img-container">
                             <img src="{{ item.imagen }}" onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\'text-muted small\'>📷 Sin imagen</span>';" alt="{{ item.producto }}">
                         </div>
-                        <h6 class="card-title fw-bold text-dark mb-2" style="font-size: 0.9rem; min-height: 2.2em;">{{ item.producto }}</h6>
+                        <h6 class="card-title fw-bold text-dark mb-3" style="font-size: 0.95rem; min-height: 2.2em;">{{ item.producto }}</h6>
                     </div>
+                    
                     <div class="price-box mt-auto">
                         <div class="d-flex justify-content-between align-items-center mb-1 pb-1 border-bottom">
                             <span class="price-label">Detal:</span>
@@ -216,7 +239,7 @@ HTML_TEMPLATE = """
                             <span class="price-label">Mayor (6+):</span>
                             <span class="fw-bold text-dark">${{ "%.2f"|format(item.mayor) }}</span>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
                             <span class="price-label">Gran Mayor (15+):</span>
                             <span class="fw-bold text-primary">${{ "%.2f"|format(item.gran_mayor) }}</span>
                         </div>
@@ -227,7 +250,7 @@ HTML_TEMPLATE = """
                             </a>
                         {% else %}
                             <button class="btn btn-agotado btn-sm w-100" disabled>
-                               ❌ Agotado por los momentos
+                               ❌ Agotado
                             </button>
                         {% endif %}
                         
