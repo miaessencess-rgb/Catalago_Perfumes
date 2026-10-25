@@ -75,7 +75,7 @@ HTML_TEMPLATE = """
     margin-bottom: 15px;
     border-radius: 50%; /* Esto lo hace 100% redondo */
     box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-    border: 4px solid #FFD700; /* Un borde dorado que combina con tu página */
+    border: 4px solid #D4AF37; /* Un borde dorado que combina con tu página */
     background-color: #000; /* Fondo negro por si el logo tiene transparencias */
 }
         .card-perfume { border: none; border-radius: 12px; transition: transform 0.2s, box-shadow 0.2s; background: #ffffff; }
