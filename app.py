@@ -7,7 +7,7 @@ import io
 app = Flask(__name__)
 
 # ⚠️ PEGA AQUÍ TU ENLACE CSV DE GOOGLE SHEETS ENTRE LAS COMILLAS
-URL_CSV = "‎https://docs.google.com/spreadsheets/d/e/2PACX-1vRAPuJtY8lL5Ikn-aOZpSiHyUz9slXX7a2AYtBCdDXBMeOfWQbuawPFrYMZbzQJ3GsYuXFaHDs3FiwA/pub?gid=1300626180&single=true&output=csv"
+URL_CSV = "‎‎https://docs.google.com/spreadsheets/d/e/2PACX-1vRAPuJtY8lL5Ikn-aOZpSiHyUz9slXX7a2AYtBCdDXBMeOfWQbuawPFrYMZbzQJ3GsYuXFaHDs3FiwA/pub?gid=1300626180&single=true&output=csv"
 
 def cargar_catalogo():
     catalogo = []
