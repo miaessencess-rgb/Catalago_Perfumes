@@ -1,49 +1,65 @@
 import os
 import pandas as pd
 from flask import Flask, render_template_string, url_for
+import urllib.request
+import io
 
 app = Flask(__name__)
 
+# ⚠️ PEGA AQUÍ TU ENLACE CSV DE GOOGLE SHEETS ENTRE LAS COMILLAS
+URL_CSV = "‎https://docs.google.com/spreadsheets/d/e/2PACX-1vRAPuJtY8lL5Ikn-aOZpSiHyUz9slXX7a2AYtBCdDXBMeOfWQbuawPFrYMZbzQJ3GsYuXFaHDs3FiwA/pub?gid=1300626180&single=true&output=csv"
+
 def cargar_catalogo():
-    df = pd.read_excel('aroma2.xlsx', sheet_name='catalogo')
     catalogo = []
     
-    ruta_carpeta = os.path.join(app.root_path, 'static', 'fotos')
-    
-    for _, row in df.iterrows():
-        nombre = str(row['Nombre'])
-        marca = str(row['marca']).strip()
+    try:
+        # Leer directamente desde Google Sheets
+        req = urllib.request.Request(URL_CSV, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req) as response:
+            data = response.read().decode('utf-8')
         
-        detal = float(row['precio_venta']) if pd.notna(row['precio_venta']) else 0.0
-        mayor = float(row['precio_mayor']) if pd.notna(row['precio_mayor']) else 0.0
-        gran_mayor = float(row['precio_gran_mayor']) if pd.notna(row['precio_gran_mayor']) else 0.0
+        # Convertir el CSV a un DataFrame de Pandas
+        df = pd.read_csv(io.StringIO(data))
         
-        slug = nombre.lower().replace(' ', '-').replace("'", "").replace('"', '').replace('&', 'and')
-        imagen = f"/static/fotos/{slug}.jpg" 
+        ruta_carpeta = os.path.join(app.root_path, 'static', 'fotos')
         
-        if os.path.exists(ruta_carpeta):
-            for archivo in os.listdir(ruta_carpeta):
-                nombre_archivo, extension = os.path.splitext(archivo)
-                if nombre_archivo == slug and extension.lower() in ['.jpg', '.jpeg', '.png', '.webp']:
-                    imagen = f"/static/fotos/{archivo}"
-                    break
-        
-        nombre_lower = nombre.lower()
-        genero = 'Unisex'
-        if any(w in nombre_lower for w in ['men', 'man', 'hombre', 'sauvage', 'eros', 'bleu', 'one million', 'bad boy', 'elixir']):
-            genero = 'Hombre'
-        elif any(w in nombre_lower for w in ['fem', 'woman', 'girl', 'yara', 'good girl', 'libre', 'black opium', 'oud gold']):
-            genero = 'Mujer'
+        for _, row in df.iterrows():
+            nombre = str(row['Nombre'])
+            marca = str(row['marca']).strip()
             
-        catalogo.append({
-            "marca": marca,
-            "producto": nombre,
-            "detal": detal,
-            "mayor": mayor,
-            "gran_mayor": gran_mayor,
-            "genero": genero,
-            "imagen": imagen
-        })
+            detal = float(row['precio_venta']) if pd.notna(row['precio_venta']) else 0.0
+            mayor = float(row['precio_mayor']) if pd.notna(row['precio_mayor']) else 0.0
+            gran_mayor = float(row['precio_gran_mayor']) if pd.notna(row['precio_gran_mayor']) else 0.0
+            
+            slug = nombre.lower().replace(' ', '-').replace("'", "").replace('"', '').replace('&', 'and')
+            imagen = f"/static/fotos/{slug}.jpg" 
+            
+            if os.path.exists(ruta_carpeta):
+                for archivo in os.listdir(ruta_carpeta):
+                    nombre_archivo, extension = os.path.splitext(archivo)
+                    if nombre_archivo == slug and extension.lower() in ['.jpg', '.jpeg', '.png', '.webp']:
+                        imagen = f"/static/fotos/{archivo}"
+                        break
+            
+            nombre_lower = nombre.lower()
+            genero = 'Unisex'
+            if any(w in nombre_lower for w in ['men', 'man', 'hombre', 'sauvage', 'eros', 'bleu', 'one million', 'bad boy', 'elixir']):
+                genero = 'Hombre'
+            elif any(w in nombre_lower for w in ['fem', 'woman', 'girl', 'yara', 'good girl', 'libre', 'black opium', 'oud gold']):
+                genero = 'Mujer'
+                
+            catalogo.append({
+                "marca": marca,
+                "producto": nombre,
+                "detal": detal,
+                "mayor": mayor,
+                "gran_mayor": gran_mayor,
+                "genero": genero,
+                "imagen": imagen
+            })
+    except Exception as e:
+        print(f"Error al cargar los datos: {e}")
+        
     return catalogo
 
 HTML_TEMPLATE = """
@@ -67,17 +83,17 @@ HTML_TEMPLATE = """
             padding: 3rem 1rem; 
         }
 
-        /* Estilo para que el logo se vea bien */
         .logo-header {
-    width: 120px;
-    height: 120px;
-    object-fit: cover; /* Recorta la imagen para que llene el círculo sin deformarse */
-    margin-bottom: 15px;
-    border-radius: 50%; /* Esto lo hace 100% redondo */
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-    border: 4px solid #F5B041; /* Un borde dorado que combina con tu página */
-    background-color: #000; /* Fondo negro por si el logo tiene transparencias */
-}
+            width: 120px;
+            height: 120px;
+            object-fit: cover; 
+            margin-bottom: 15px;
+            border-radius: 50%; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border: 4px solid #FFD700; /* Borde Dorado */
+            background-color: #000; 
+        }
+
         .card-perfume { border: none; border-radius: 12px; transition: transform 0.2s, box-shadow 0.2s; background: #ffffff; }
         .card-perfume:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
         .badge-brand { background-color: #f3f4f6; color: #374151; font-weight: 600; font-size: 0.75rem; padding: 0.35em 0.65em; border-radius: 6px; }
@@ -94,7 +110,6 @@ HTML_TEMPLATE = """
 <body>
 
     <div class="header-bg shadow-sm mb-4">
-        <!-- AQUI ESTA TU LOGO (Asegúrate de que se llame logo.png o logo.jpg) -->
         <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Mi Logo" class="logo-header">
         
         <h1 class="fw-bold m-0">✨ Catálogo de Perfumes</h1>
@@ -145,7 +160,6 @@ HTML_TEMPLATE = """
                             <span class="fw-bold text-primary">${{ "%.2f"|format(item.gran_mayor) }}</span>
                         </div>
                         
-                        <!-- BOTÓN DE WHATSAPP CON TU NÚMERO: 584228490047 -->
                         <a href="https://wa.me/584228490047?text=Hola,%20estoy%20interesado%20en%20el%20perfume:%20{{ item.producto | urlencode }}%20-%20Marca:%20{{ item.marca | urlencode }}.%20Precio%20Detal:%20${{ '%.2f'|format(item.detal) }}" 
                            target="_blank" 
                            class="btn btn-whatsapp btn-sm w-100">
