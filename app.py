@@ -51,15 +51,12 @@ def cargar_catalogo():
             stock = limpiar_stock(row.get('stock', 1))
             
             slug = nombre.lower().replace(' ', '-').replace("'", "").replace('"', '').replace('&', 'and')
+            imagen = f"/static/fotos/{slug}.jpg" 
             
-            # --- BÚSQUEDA ULTRA INTELIGENTE (IGNORA LA EXTENSIÓN) ---
-            imagen = f"/static/fotos/{slug}.jpg" # Valor por defecto
-            
+            # Búsqueda inteligente de imagen
             if os.path.exists(ruta_carpeta):
                 for archivo in os.listdir(ruta_carpeta):
-                    # Separamos el nombre de la extensión
                     nombre_archivo, extension = os.path.splitext(archivo)
-                    # Si el nombre base coincide (ignorando mayúsculas/minúsculas), ¡lo agarra!
                     if nombre_archivo.lower() == slug.lower():
                         imagen = f"/static/fotos/{archivo}"
                         break
@@ -95,7 +92,7 @@ HTML_TEMPLATE = """
     <title>Catálogo Digital de Perfumes</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #f4f6f8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
+        body { background-color: #f4f6f8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; padding-bottom: 80px; }
         
         .header-bg { 
             background: linear-gradient(rgba(17, 24, 39, 0.7), rgba(17, 24, 39, 0.7)), url("{{ url_for('static', filename='fotos/banner.jpg') }}");
@@ -108,14 +105,10 @@ HTML_TEMPLATE = """
         }
 
         .logo-header {
-            width: 120px;
-            height: 120px;
-            object-fit: cover; 
-            margin-bottom: 15px;
-            border-radius: 50%; 
+            width: 120px; height: 120px; object-fit: cover; 
+            margin-bottom: 15px; border-radius: 50%; 
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            border: 4px solid #FFD700;
-            background-color: #000; 
+            border: 4px solid #FFD700; background-color: #000; 
         }
 
         .card-perfume { border: none; border-radius: 12px; transition: transform 0.2s, box-shadow 0.2s; background: #ffffff; }
@@ -133,6 +126,21 @@ HTML_TEMPLATE = """
         .btn-whatsapp { background-color: #25D366; color: white; font-weight: bold; border: none; }
         .btn-whatsapp:hover { background-color: #1ebe57; color: white; }
         .btn-agotado { background-color: #6c757d; color: white; font-weight: bold; border: none; cursor: not-allowed; }
+        
+        /* Botón flotante del carrito */
+        .cart-float {
+            position: fixed; bottom: 20px; right: 20px; z-index: 1000;
+            background-color: #25D366; color: white; border-radius: 50%;
+            width: 65px; height: 65px; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer;
+            font-size: 1.8rem; text-decoration: none; transition: transform 0.2s;
+        }
+        .cart-float:hover { transform: scale(1.1); color: white; }
+        .cart-badge {
+            position: absolute; top: -5px; right: -5px;
+            background-color: #dc3545; color: white; border-radius: 50%;
+            padding: 0.25em 0.6em; font-size: 0.8rem; font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -197,9 +205,9 @@ HTML_TEMPLATE = """
                         </div>
                         
                         {% if item.stock > 0 %}
-                            <a href="https://wa.me/584228490047?text=Hola,%20estoy%20interesado%20en%20el%20perfume:%20{{ item.producto | urlencode }}%20-%20Marca:%20{{ item.marca | urlencode }}.%20Precio%20Detal:%20${{ '%.2f'|format(item.detal) }}" target="_blank" class="btn btn-whatsapp btn-sm w-100">
-                               💬 Pedir por WhatsApp
-                            </a>
+                            <button onclick="addToCart('{{ item.producto }}', '{{ item.detal }}', '{{ item.mayor }}', '{{ item.gran_mayor }}')" class="btn btn-outline-dark btn-sm w-100 fw-bold" style="border-radius: 8px;">
+                               ➕ Agregar al Pedido
+                            </button>
                         {% else %}
                             <button class="btn btn-agotado btn-sm w-100" disabled>
                                ❌ Agotado por los momentos
@@ -213,6 +221,12 @@ HTML_TEMPLATE = """
         </div>
     </div>
 
+    <!-- Botón flotante del carrito (oculto por defecto) -->
+    <a href="#" id="cartButton" class="cart-float d-none" onclick="sendOrder()">
+        🛒
+        <span id="cartCount" class="cart-badge">0</span>
+    </a>
+
     <script>
     function filterProducts() {
         let input = document.getElementById('searchInput').value.toLowerCase();
@@ -223,6 +237,68 @@ HTML_TEMPLATE = """
             else { items[i].style.display = "none"; }
         }
     }
+
+    // Lógica del Carrito
+    let cart = JSON.parse(localStorage.getItem('aroma_cart')) || [];
+    
+    function updateCartUI() {
+        let totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+        let btn = document.getElementById('cartButton');
+        let badge = document.getElementById('cartCount');
+        
+        if (totalItems > 0) {
+            btn.classList.remove('d-none');
+            badge.innerText = totalItems;
+        } else {
+            btn.classList.add('d-none');
+        }
+    }
+
+    function addToCart(nombre, detal, mayor, gran_mayor) {
+        let existingItem = cart.find(item => item.nombre === nombre);
+        if (existingItem) {
+            existingItem.qty += 1;
+        } else {
+            cart.push({ nombre: nombre, detal: detal, mayor: mayor, gran_mayor: gran_mayor, qty: 1 });
+        }
+        localStorage.setItem('aroma_cart', JSON.stringify(cart));
+        updateCartUI();
+    }
+
+    function sendOrder() {
+        if (cart.length === 0) return;
+        
+        let mensaje = "Hola, quiero hacer el siguiente pedido:\\n\\n";
+        let total = 0;
+        
+        cart.forEach(item => {
+            // Calculamos el precio según la cantidad (aplicando lógica de mayorista)
+            let precioUnitario = parseFloat(item.detal);
+            let tipoPrecio = "Detal";
+            
+            if (item.qty >= 15) {
+                precioUnitario = parseFloat(item.gran_mayor);
+                tipoPrecio = "Gran Mayor";
+            } else if (item.qty >= 6) {
+                precioUnitario = parseFloat(item.mayor);
+                tipoPrecio = "Mayor";
+            }
+            
+            let subtotal = precioUnitario * item.qty;
+            total += subtotal;
+            
+            mensaje += `- ${item.qty}x ${item.nombre} (${tipoPrecio}: $${precioUnitario.toFixed(2)} c/u) = $${subtotal.toFixed(2)}\\n`;
+        });
+        
+        mensaje += `\\n*Total estimado: $${total.toFixed(2)}*`;
+        mensaje += "\\n\\nPor favor, confírmame disponibilidad y método de pago.";
+        
+        let url = "https://wa.me/584228490047?text=" + encodeURIComponent(mensaje);
+        window.open(url, '_blank');
+    }
+
+    // Inicializar UI al cargar la página
+    document.addEventListener('DOMContentLoaded', updateCartUI);
     </script>
 </body>
 </html>
