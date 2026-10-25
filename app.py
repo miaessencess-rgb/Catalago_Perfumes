@@ -53,6 +53,7 @@ def cargar_catalogo():
             slug = nombre.lower().replace(' ', '-').replace("'", "").replace('"', '').replace('&', 'and')
             imagen = f"/static/fotos/{slug}.jpg" 
             
+            # Búsqueda de imagen (acepta cualquier extensión)
             if os.path.exists(ruta_carpeta):
                 for archivo in os.listdir(ruta_carpeta):
                     nombre_archivo, extension = os.path.splitext(archivo)
@@ -91,7 +92,7 @@ HTML_TEMPLATE = """
     <title>Catálogo Digital de Perfumes</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #f4f6f8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; padding-bottom: 80px; }
+        body { background-color: #f4f6f8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
         
         .header-bg { 
             background: linear-gradient(rgba(17, 24, 39, 0.7), rgba(17, 24, 39, 0.7)), url("{{ url_for('static', filename='fotos/banner.jpg') }}");
@@ -125,28 +126,6 @@ HTML_TEMPLATE = """
         .btn-whatsapp { background-color: #25D366; color: white; font-weight: bold; border: none; }
         .btn-whatsapp:hover { background-color: #1ebe57; color: white; }
         .btn-agotado { background-color: #6c757d; color: white; font-weight: bold; border: none; cursor: not-allowed; }
-        
-        .cart-float {
-            position: fixed; bottom: 20px; right: 20px; z-index: 1000;
-            background-color: #25D366; color: white; border-radius: 50%;
-            width: 65px; height: 65px; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer;
-            font-size: 1.8rem; text-decoration: none; transition: transform 0.2s;
-        }
-        .cart-float:hover { transform: scale(1.1); color: white; }
-        .cart-badge {
-            position: absolute; top: -5px; right: -5px;
-            background-color: #dc3545; color: white; border-radius: 50%;
-            padding: 0.25em 0.6em; font-size: 0.8rem; font-weight: bold;
-        }
-
-        .toast-notification {
-            position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
-            background-color: #333; color: white; padding: 10px 20px;
-            border-radius: 20px; font-size: 0.9rem; z-index: 2000;
-            opacity: 0; transition: opacity 0.3s; pointer-events: none;
-        }
-        .toast-notification.show { opacity: 1; }
     </style>
 </head>
 <body>
@@ -211,15 +190,9 @@ HTML_TEMPLATE = """
                         </div>
                         
                         {% if item.stock > 0 %}
-                            <!-- Usamos data-attributes para no romper el HTML con apóstrofes -->
-                            <button class="btn btn-outline-dark btn-sm w-100 fw-bold btn-add-cart" 
-                                    data-nombre="{{ item.producto }}" 
-                                    data-detal="{{ item.detal }}" 
-                                    data-mayor="{{ item.mayor }}" 
-                                    data-granmayor="{{ item.gran_mayor }}"
-                                    style="border-radius: 8px;">
-                               ➕ Agregar al Pedido
-                            </button>
+                            <a href="https://wa.me/584228490047?text=Hola,%20estoy%20interesado%20en%20el%20perfume:%20{{ item.producto | urlencode }}%20-%20Marca:%20{{ item.marca | urlencode }}.%20Precio%20Detal:%20${{ '%.2f'|format(item.detal) }}" target="_blank" class="btn btn-whatsapp btn-sm w-100">
+                               💬 Pedir por WhatsApp
+                            </a>
                         {% else %}
                             <button class="btn btn-agotado btn-sm w-100" disabled>
                                ❌ Agotado por los momentos
@@ -233,121 +206,15 @@ HTML_TEMPLATE = """
         </div>
     </div>
 
-    <!-- Notificación Toast -->
-    <div id="toast" class="toast-notification">✅ Producto agregado al carrito</div>
-
-    <!-- Botón flotante del carrito -->
-    <div id="cartButton" class="cart-float" onclick="sendOrder(event)">
-        🛒
-        <span id="cartCount" class="cart-badge">0</span>
-    </div>
-
     <script>
-    // Funciones básicas (ES5) para máxima compatibilidad en celulares
-    
     function filterProducts() {
-        var input = document.getElementById('searchInput').value.toLowerCase();
-        var items = document.getElementsByClassName('product-item');
-        for (var i = 0; i < items.length; i++) {
-            var searchData = items[i].getAttribute('data-search');
-            if (searchData.indexOf(input) > -1) { 
-                items[i].style.display = ""; 
-            } else { 
-                items[i].style.display = "none"; 
-            }
+        let input = document.getElementById('searchInput').value.toLowerCase();
+        let items = document.getElementsByClassName('product-item');
+        for (let i = 0; i < items.length; i++) {
+            let searchData = items[i].getAttribute('data-search');
+            if (searchData.includes(input)) { items[i].style.display = ""; } 
+            else { items[i].style.display = "none"; }
         }
-    }
-
-    var cart = [];
-    
-    function updateCartUI() {
-        var totalItems = 0;
-        for (var i = 0; i < cart.length; i++) {
-            totalItems += cart[i].qty;
-        }
-        var badge = document.getElementById('cartCount');
-        if (badge) badge.innerText = totalItems;
-    }
-
-    function showToast() {
-        var toast = document.getElementById('toast');
-        if (toast) {
-            toast.classList.add('show');
-            setTimeout(function() { toast.classList.remove('show'); }, 2000);
-        }
-    }
-
-    // Escuchar los clics en toda la página (Event Delegation)
-    document.addEventListener('click', function(e) {
-        // Si se hizo clic en un botón de "Agregar"
-        if (e.target && e.target.classList.contains('btn-add-cart')) {
-            var btn = e.target;
-            var nombre = btn.getAttribute('data-nombre');
-            var detal = parseFloat(btn.getAttribute('data-detal'));
-            var mayor = parseFloat(btn.getAttribute('data-mayor'));
-            var gran_mayor = parseFloat(btn.getAttribute('data-granmayor'));
-
-            var found = false;
-            for (var i = 0; i < cart.length; i++) {
-                if (cart[i].nombre === nombre) {
-                    cart[i].qty += 1;
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                cart.push({ nombre: nombre, detal: detal, mayor: mayor, gran_mayor: gran_mayor, qty: 1 });
-            }
-            
-            updateCartUI();
-            showToast();
-        }
-    });
-
-    // Función para enviar el pedido (se llama desde el HTML)
-    function sendOrder(event) {
-        if(event) event.preventDefault();
-        
-        if (cart.length === 0) {
-            alert("Tu carrito está vacío. Agrega algún perfume primero.");
-            return;
-        }
-        
-        var totalUnidades = 0;
-        for (var i = 0; i < cart.length; i++) {
-            totalUnidades += cart[i].qty;
-        }
-        
-        var tipoPrecio = "Detal";
-        if (totalUnidades >= 15) {
-            tipoPrecio = "Gran Mayor";
-        } else if (totalUnidades >= 6) {
-            tipoPrecio = "Mayor";
-        }
-        
-        var mensaje = "Hola, quiero hacer el siguiente pedido (" + tipoPrecio + "):\n\n";
-        var totalPagar = 0;
-        
-        for (var i = 0; i < cart.length; i++) {
-            var item = cart[i];
-            var precioUnitario = item.detal;
-            if (tipoPrecio === "Gran Mayor") precioUnitario = item.gran_mayor;
-            else if (tipoPrecio === "Mayor") precioUnitario = item.mayor;
-            
-            var subtotal = precioUnitario * item.qty;
-            totalPagar += subtotal;
-            
-            mensaje += "- " + item.qty + "x " + item.nombre + " ($" + precioUnitario.toFixed(2) + " c/u) = $" + subtotal.toFixed(2) + "\n";
-        }
-        
-        mensaje += "\n*Total estimado: $" + totalPagar.toFixed(2) + "*";
-        mensaje += "\n\nPor favor, confírmame disponibilidad y método de pago.";
-        
-        var url = "https://wa.me/584228490047?text=" + encodeURIComponent(mensaje);
-        window.location.href = url;
-        
-        cart = [];
-        updateCartUI();
     }
     </script>
 </body>
