@@ -6,11 +6,12 @@ import io
 
 app = Flask(__name__)
 
-# ⚠️ PEGA AQUÍ TU ENLACE CSV DE GOOGLE SHEETS ENTRE LAS COMILLAS
-URL_CSV = "‎‎https://docs.google.com/spreadsheets/d/e/2PACX-1vRAPuJtY8lL5Ikn-aOZpSiHyUz9slXX7a2AYtBCdDXBMeOfWQbuawPFrYMZbzQJ3GsYuXFaHDs3FiwA/pub?gid=1300626180&single=true&output=csv"
+# ⚠️ PEGA AQUÍ TU ENLACE CSV (Borra cualquier espacio o símbolo invisible antes del https)
+URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRAPuJtY8lL5Ikn-aOZpSiHyUz9slXX7a2AYtBCdDXBMeOfWQbuawPFrYMZbzQJ3GsYuXFaHDs3FiwA/pub?gid=1300626180&single=true&output=csv"
 
 def cargar_catalogo():
     catalogo = []
+    error_msg = ""
     
     try:
         # Leer directamente desde Google Sheets
@@ -21,15 +22,24 @@ def cargar_catalogo():
         # Convertir el CSV a un DataFrame de Pandas
         df = pd.read_csv(io.StringIO(data))
         
+        # Limpiar los nombres de las columnas por si Google Sheets metió espacios invisibles
+        df.columns = df.columns.str.strip()
+        
         ruta_carpeta = os.path.join(app.root_path, 'static', 'fotos')
         
         for _, row in df.iterrows():
-            nombre = str(row['Nombre'])
-            marca = str(row['marca']).strip()
+            nombre = str(row.get('Nombre', ''))
+            marca = str(row.get('marca', '')).strip()
             
-            detal = float(row['precio_venta']) if pd.notna(row['precio_venta']) else 0.0
-            mayor = float(row['precio_mayor']) if pd.notna(row['precio_mayor']) else 0.0
-            gran_mayor = float(row['precio_gran_mayor']) if pd.notna(row['precio_gran_mayor']) else 0.0
+            if not nombre or nombre == 'nan':
+                continue
+
+            try:
+                detal = float(row['precio_venta']) if pd.notna(row['precio_venta']) else 0.0
+                mayor = float(row['precio_mayor']) if pd.notna(row['precio_mayor']) else 0.0
+                gran_mayor = float(row['precio_gran_mayor']) if pd.notna(row['precio_gran_mayor']) else 0.0
+            except Exception:
+                detal, mayor, gran_mayor = 0.0, 0.0, 0.0
             
             slug = nombre.lower().replace(' ', '-').replace("'", "").replace('"', '').replace('&', 'and')
             imagen = f"/static/fotos/{slug}.jpg" 
@@ -58,9 +68,10 @@ def cargar_catalogo():
                 "imagen": imagen
             })
     except Exception as e:
+        error_msg = str(e)
         print(f"Error al cargar los datos: {e}")
         
-    return catalogo
+    return catalogo, error_msg
 
 HTML_TEMPLATE = """
 <!DOCTYPE html>
@@ -72,28 +83,8 @@ HTML_TEMPLATE = """
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #f4f6f8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
-        
-        .header-bg { 
-            background: linear-gradient(rgba(17, 24, 39, 0.7), rgba(17, 24, 39, 0.7)), url("{{ url_for('static', filename='fotos/banner.jpg') }}");
-            background-size: cover;
-            background-position: center;
-            color: white; 
-            text-align: center; 
-            border-bottom: 4px solid #d97706; 
-            padding: 3rem 1rem; 
-        }
-
-        .logo-header {
-            width: 120px;
-            height: 120px;
-            object-fit: cover; 
-            margin-bottom: 15px;
-            border-radius: 50%; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            border: 4px solid #FFD700; /* Borde Dorado */
-            background-color: #000; 
-        }
-
+        .header-bg { background: linear-gradient(rgba(17, 24, 39, 0.7), rgba(17, 24, 39, 0.7)), url("{{ url_for('static', filename='fotos/banner.jpg') }}"); background-size: cover; background-position: center; color: white; text-align: center; border-bottom: 4px solid #d97706; padding: 3rem 1rem; }
+        .logo-header { width: 120px; height: 120px; object-fit: cover; margin-bottom: 15px; border-radius: 50%; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border: 4px solid #FFD700; background-color: #000; }
         .card-perfume { border: none; border-radius: 12px; transition: transform 0.2s, box-shadow 0.2s; background: #ffffff; }
         .card-perfume:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
         .badge-brand { background-color: #f3f4f6; color: #374151; font-weight: 600; font-size: 0.75rem; padding: 0.35em 0.65em; border-radius: 6px; }
@@ -102,7 +93,6 @@ HTML_TEMPLATE = """
         .price-label { color: #6b7280; font-size: 0.75rem; display: block; }
         .img-container { height: 140px; display: flex; align-items: center; justify-content: center; background-color: #fafafa; border-radius: 8px; overflow: hidden; margin-bottom: 10px; }
         .img-container img { max-height: 100%; max-width: 100%; object-fit: contain; }
-        
         .btn-whatsapp { background-color: #25D366; color: white; font-weight: bold; border: none; }
         .btn-whatsapp:hover { background-color: #1ebe57; color: white; }
     </style>
@@ -111,12 +101,18 @@ HTML_TEMPLATE = """
 
     <div class="header-bg shadow-sm mb-4">
         <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Mi Logo" class="logo-header">
-        
         <h1 class="fw-bold m-0">✨ Catálogo de Perfumes</h1>
         <p class="text-light opacity-75 mt-1 small">Detal, Mayor (6+ unds) y Gran Mayor (15+ unds)</p>
     </div>
 
     <div class="container pb-5">
+        {% if error_msg %}
+        <div class="alert alert-danger text-center">
+            <strong>Error al cargar los productos:</strong> {{ error_msg }}<br>
+            <small>Revisa que el enlace de Google Sheets sea el correcto y esté publicado como .csv</small>
+        </div>
+        {% endif %}
+
         <div class="row justify-content-center mb-4">
             <div class="col-12 col-md-8 col-lg-6">
                 <input type="text" id="searchInput" class="form-control form-control-lg shadow-sm" placeholder="🔍 Buscar perfume o marca..." onkeyup="filterProducts()">
@@ -138,14 +134,11 @@ HTML_TEMPLATE = """
                                 <span class="badge bg-warning-subtle text-warning-emphasis" style="font-size:0.7rem;">Unisex</span>
                             {% endif %}
                         </div>
-
                         <div class="img-container">
                             <img src="{{ item.imagen }}" onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\'text-muted small\'>📷 Sin imagen</span>';" alt="{{ item.producto }}">
                         </div>
-
                         <h6 class="card-title fw-bold text-dark mb-2" style="font-size: 0.9rem; min-height: 2.2em;">{{ item.producto }}</h6>
                     </div>
-
                     <div class="price-box mt-auto">
                         <div class="d-flex justify-content-between align-items-center mb-1 pb-1 border-bottom">
                             <span class="price-label">Detal:</span>
@@ -159,13 +152,9 @@ HTML_TEMPLATE = """
                             <span class="price-label">Gran Mayor (15+):</span>
                             <span class="fw-bold text-primary">${{ "%.2f"|format(item.gran_mayor) }}</span>
                         </div>
-                        
-                        <a href="https://wa.me/584228490047?text=Hola,%20estoy%20interesado%20en%20el%20perfume:%20{{ item.producto | urlencode }}%20-%20Marca:%20{{ item.marca | urlencode }}.%20Precio%20Detal:%20${{ '%.2f'|format(item.detal) }}" 
-                           target="_blank" 
-                           class="btn btn-whatsapp btn-sm w-100">
+                        <a href="https://wa.me/584228490047?text=Hola,%20estoy%20interesado%20en%20el%20perfume:%20{{ item.producto | urlencode }}%20-%20Marca:%20{{ item.marca | urlencode }}.%20Precio%20Detal:%20${{ '%.2f'|format(item.detal) }}" target="_blank" class="btn btn-whatsapp btn-sm w-100">
                            💬 Pedir por WhatsApp
                         </a>
-                        
                     </div>
                 </div>
             </div>
@@ -177,14 +166,10 @@ HTML_TEMPLATE = """
     function filterProducts() {
         let input = document.getElementById('searchInput').value.toLowerCase();
         let items = document.getElementsByClassName('product-item');
-
         for (let i = 0; i < items.length; i++) {
             let searchData = items[i].getAttribute('data-search');
-            if (searchData.includes(input)) {
-                items[i].style.display = "";
-            } else {
-                items[i].style.display = "none";
-            }
+            if (searchData.includes(input)) { items[i].style.display = ""; } 
+            else { items[i].style.display = "none"; }
         }
     }
     </script>
@@ -194,8 +179,8 @@ HTML_TEMPLATE = """
 
 @app.route('/')
 def home():
-    catalogo = cargar_catalogo()
-    return render_template_string(HTML_TEMPLATE, catalogo=catalogo)
+    catalogo, error_msg = cargar_catalogo()
+    return render_template_string(HTML_TEMPLATE, catalogo=catalogo, error_msg=error_msg)
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
