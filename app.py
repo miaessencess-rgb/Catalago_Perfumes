@@ -8,7 +8,6 @@ def cargar_catalogo():
     df = pd.read_excel('aroma2.xlsx', sheet_name='catalogo')
     catalogo = []
     
-    # Ruta absoluta a la carpeta de fotos para que Linux no se pierda
     ruta_carpeta = os.path.join(app.root_path, 'static', 'fotos')
     
     for _, row in df.iterrows():
@@ -19,19 +18,14 @@ def cargar_catalogo():
         mayor = float(row['precio_mayor']) if pd.notna(row['precio_mayor']) else 0.0
         gran_mayor = float(row['precio_gran_mayor']) if pd.notna(row['precio_gran_mayor']) else 0.0
         
-        # Generar el nombre base (slug) sin espacios ni caracteres raros
         slug = nombre.lower().replace(' ', '-').replace("'", "").replace('"', '').replace('&', 'and')
-        
-        # Imagen por defecto si no se encuentra ninguna
         imagen = f"/static/fotos/{slug}.jpg" 
         
-        # BÚSQUEDA INTELIGENTE Y A PRUEBA DE FALLOS (Ignora mayúsculas/minúsculas en la extensión)
         if os.path.exists(ruta_carpeta):
             for archivo in os.listdir(ruta_carpeta):
                 nombre_archivo, extension = os.path.splitext(archivo)
-                # Si el nombre coincide y es una imagen, la usa
                 if nombre_archivo == slug and extension.lower() in ['.jpg', '.jpeg', '.png', '.webp']:
-                    imagen = f"/static/fotos/{archivo}" # Usa el nombre exacto del archivo encontrado
+                    imagen = f"/static/fotos/{archivo}"
                     break
         
         nombre_lower = nombre.lower()
@@ -81,6 +75,10 @@ HTML_TEMPLATE = """
         .price-label { color: #6b7280; font-size: 0.75rem; display: block; }
         .img-container { height: 140px; display: flex; align-items: center; justify-content: center; background-color: #fafafa; border-radius: 8px; overflow: hidden; margin-bottom: 10px; }
         .img-container img { max-height: 100%; max-width: 100%; object-fit: contain; }
+        
+        /* Estilo para el botón de WhatsApp */
+        .btn-whatsapp { background-color: #25D366; color: white; font-weight: bold; border: none; }
+        .btn-whatsapp:hover { background-color: #1ebe57; color: white; }
     </style>
 </head>
 <body>
@@ -129,10 +127,18 @@ HTML_TEMPLATE = """
                             <span class="price-label">Mayor (6+):</span>
                             <span class="fw-bold text-dark">${{ "%.2f"|format(item.mayor) }}</span>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="price-label">Gran Mayor (15+):</span>
                             <span class="fw-bold text-primary">${{ "%.2f"|format(item.gran_mayor) }}</span>
                         </div>
+                        
+                        <!-- BOTÓN DE WHATSAPP -->
+                        <a href="https://wa.me/584228490047?text=Hola,%20estoy%20interesado%20en%20el%20perfume:%20{{ item.producto | urlencode }}%20-%20Marca:%20{{ item.marca | urlencode }}.%20Precio%20Detal:%20${{ '%.2f'|format(item.detal) }}" 
+                           target="_blank" 
+                           class="btn btn-whatsapp btn-sm w-100">
+                           💬 Pedir por WhatsApp
+                        </a>
+                        
                     </div>
                 </div>
             </div>
