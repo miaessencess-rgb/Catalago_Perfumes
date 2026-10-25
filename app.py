@@ -42,7 +42,7 @@ def cargar_catalogo():
         ruta_carpeta = os.path.join(app.root_path, 'static', 'fotos')
         
         for _, row in df.iterrows():
-            nombre = str(row.get('Nombre', ''))
+            nombre = str(row.get('Nombre', '')).strip()
             marca = str(row.get('marca', '')).strip()
             
             if not nombre or nombre == 'nan':
