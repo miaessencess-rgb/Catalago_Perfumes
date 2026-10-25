@@ -67,6 +67,16 @@ HTML_TEMPLATE = """
             padding: 3rem 1rem; 
         }
 
+        /* Estilo para que el logo se vea bien */
+        .logo-header {
+            max-height: 110px;
+            max-width: 100%;
+            object-fit: contain;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
         .card-perfume { border: none; border-radius: 12px; transition: transform 0.2s, box-shadow 0.2s; background: #ffffff; }
         .card-perfume:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
         .badge-brand { background-color: #f3f4f6; color: #374151; font-weight: 600; font-size: 0.75rem; padding: 0.35em 0.65em; border-radius: 6px; }
@@ -76,7 +86,6 @@ HTML_TEMPLATE = """
         .img-container { height: 140px; display: flex; align-items: center; justify-content: center; background-color: #fafafa; border-radius: 8px; overflow: hidden; margin-bottom: 10px; }
         .img-container img { max-height: 100%; max-width: 100%; object-fit: contain; }
         
-        /* Estilo para el botón de WhatsApp */
         .btn-whatsapp { background-color: #25D366; color: white; font-weight: bold; border: none; }
         .btn-whatsapp:hover { background-color: #1ebe57; color: white; }
     </style>
@@ -84,6 +93,9 @@ HTML_TEMPLATE = """
 <body>
 
     <div class="header-bg shadow-sm mb-4">
+        <!-- AQUI ESTA TU LOGO (Asegúrate de que se llame logo.png o logo.jpg) -->
+        <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Mi Logo" class="logo-header">
+        
         <h1 class="fw-bold m-0">✨ Catálogo de Perfumes</h1>
         <p class="text-light opacity-75 mt-1 small">Detal, Mayor (6+ unds) y Gran Mayor (15+ unds)</p>
     </div>
@@ -132,7 +144,7 @@ HTML_TEMPLATE = """
                             <span class="fw-bold text-primary">${{ "%.2f"|format(item.gran_mayor) }}</span>
                         </div>
                         
-                        <!-- BOTÓN DE WHATSAPP -->
+                        <!-- BOTÓN DE WHATSAPP CON TU NÚMERO: 584228490047 -->
                         <a href="https://wa.me/584228490047?text=Hola,%20estoy%20interesado%20en%20el%20perfume:%20{{ item.producto | urlencode }}%20-%20Marca:%20{{ item.marca | urlencode }}.%20Precio%20Detal:%20${{ '%.2f'|format(item.detal) }}" 
                            target="_blank" 
                            class="btn btn-whatsapp btn-sm w-100">
