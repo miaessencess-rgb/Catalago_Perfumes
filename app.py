@@ -53,7 +53,6 @@ def cargar_catalogo():
             slug = nombre.lower().replace(' ', '-').replace("'", "").replace('"', '').replace('&', 'and')
             imagen = f"/static/fotos/{slug}.jpg" 
             
-            # Búsqueda inteligente de imagen
             if os.path.exists(ruta_carpeta):
                 for archivo in os.listdir(ruta_carpeta):
                     nombre_archivo, extension = os.path.splitext(archivo)
@@ -127,7 +126,6 @@ HTML_TEMPLATE = """
         .btn-whatsapp:hover { background-color: #1ebe57; color: white; }
         .btn-agotado { background-color: #6c757d; color: white; font-weight: bold; border: none; cursor: not-allowed; }
         
-        /* Botón flotante del carrito */
         .cart-float {
             position: fixed; bottom: 20px; right: 20px; z-index: 1000;
             background-color: #25D366; color: white; border-radius: 50%;
@@ -221,7 +219,7 @@ HTML_TEMPLATE = """
         </div>
     </div>
 
-    <!-- Botón flotante del carrito (oculto por defecto) -->
+    <!-- Botón flotante del carrito -->
     <a href="#" id="cartButton" class="cart-float d-none" onclick="sendOrder()">
         🛒
         <span id="cartCount" class="cart-badge">0</span>
@@ -259,7 +257,7 @@ HTML_TEMPLATE = """
         if (existingItem) {
             existingItem.qty += 1;
         } else {
-            cart.push({ nombre: nombre, detal: detal, mayor: mayor, gran_mayor: gran_mayor, qty: 1 });
+            cart.push({ nombre: nombre, detal: parseFloat(detal), mayor: parseFloat(mayor), gran_mayor: parseFloat(gran_mayor), qty: 1 });
         }
         localStorage.setItem('aroma_cart', JSON.stringify(cart));
         updateCartUI();
@@ -268,36 +266,38 @@ HTML_TEMPLATE = """
     function sendOrder() {
         if (cart.length === 0) return;
         
-        let mensaje = "Hola, quiero hacer el siguiente pedido:\\n\\n";
-        let total = 0;
+        // 1. Calcular el total de unidades en TODO el carrito
+        let totalUnidades = cart.reduce((sum, item) => sum + item.qty, 0);
+        
+        // 2. Determinar qué precio aplicar a TODOS los productos
+        let tipoPrecio = "Detal";
+        if (totalUnidades >= 15) {
+            tipoPrecio = "Gran Mayor";
+        } else if (totalUnidades >= 6) {
+            tipoPrecio = "Mayor";
+        }
+        
+        let mensaje = `Hola, quiero hacer el siguiente pedido (${tipoPrecio}):\\n\\n`;
+        let totalPagar = 0;
         
         cart.forEach(item => {
-            // Calculamos el precio según la cantidad (aplicando lógica de mayorista)
-            let precioUnitario = parseFloat(item.detal);
-            let tipoPrecio = "Detal";
-            
-            if (item.qty >= 15) {
-                precioUnitario = parseFloat(item.gran_mayor);
-                tipoPrecio = "Gran Mayor";
-            } else if (item.qty >= 6) {
-                precioUnitario = parseFloat(item.mayor);
-                tipoPrecio = "Mayor";
-            }
+            let precioUnitario = item.detal;
+            if (tipoPrecio === "Gran Mayor") precioUnitario = item.gran_mayor;
+            else if (tipoPrecio === "Mayor") precioUnitario = item.mayor;
             
             let subtotal = precioUnitario * item.qty;
-            total += subtotal;
+            totalPagar += subtotal;
             
-            mensaje += `- ${item.qty}x ${item.nombre} (${tipoPrecio}: $${precioUnitario.toFixed(2)} c/u) = $${subtotal.toFixed(2)}\\n`;
+            mensaje += `- ${item.qty}x ${item.nombre} ($${precioUnitario.toFixed(2)} c/u) = $${subtotal.toFixed(2)}\\n`;
         });
         
-        mensaje += `\\n*Total estimado: $${total.toFixed(2)}*`;
+        mensaje += `\\n*Total estimado: $${totalPagar.toFixed(2)}*`;
         mensaje += "\\n\\nPor favor, confírmame disponibilidad y método de pago.";
         
         let url = "https://wa.me/584228490047?text=" + encodeURIComponent(mensaje);
         window.open(url, '_blank');
     }
 
-    // Inicializar UI al cargar la página
     document.addEventListener('DOMContentLoaded', updateCartUI);
     </script>
 </body>
