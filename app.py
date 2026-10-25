@@ -126,7 +126,6 @@ HTML_TEMPLATE = """
         .btn-whatsapp:hover { background-color: #1ebe57; color: white; }
         .btn-agotado { background-color: #6c757d; color: white; font-weight: bold; border: none; cursor: not-allowed; }
         
-        /* Carrito Flotante */
         .cart-float {
             position: fixed; bottom: 20px; right: 20px; z-index: 1000;
             background-color: #25D366; color: white; border-radius: 50%;
@@ -141,7 +140,6 @@ HTML_TEMPLATE = """
             padding: 0.25em 0.6em; font-size: 0.8rem; font-weight: bold;
         }
 
-        /* Notificación Toast */
         .toast-notification {
             position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
             background-color: #333; color: white; padding: 10px 20px;
@@ -213,7 +211,13 @@ HTML_TEMPLATE = """
                         </div>
                         
                         {% if item.stock > 0 %}
-                            <button onclick="addToCart('{{ item.producto }}', '{{ item.detal }}', '{{ item.mayor }}', '{{ item.gran_mayor }}')" class="btn btn-outline-dark btn-sm w-100 fw-bold" style="border-radius: 8px;">
+                            <!-- CORREGIDO: Usamos data-attributes para evitar el error de los apóstrofes -->
+                            <button class="btn btn-outline-dark btn-sm w-100 fw-bold btn-add-cart" 
+                                    data-nombre="{{ item.producto }}" 
+                                    data-detal="{{ item.detal }}" 
+                                    data-mayor="{{ item.mayor }}" 
+                                    data-granmayor="{{ item.gran_mayor }}"
+                                    style="border-radius: 8px;">
                                ➕ Agregar al Pedido
                             </button>
                         {% else %}
@@ -230,7 +234,7 @@ HTML_TEMPLATE = """
     </div>
 
     <!-- Notificación Toast -->
-    <div id="toast" class="toast-notification">Producto agregado al carrito ✅</div>
+    <div id="toast" class="toast-notification">✅ Producto agregado al carrito</div>
 
     <!-- Botón flotante del carrito (SIEMPRE VISIBLE) -->
     <div id="cartButton" class="cart-float" onclick="sendOrder(event)">
@@ -311,8 +315,6 @@ HTML_TEMPLATE = """
         mensaje += "\n\nPor favor, confírmame disponibilidad y método de pago.";
         
         let url = "https://wa.me/584228490047?text=" + encodeURIComponent(mensaje);
-        
-        // Abrir WhatsApp
         window.location.href = url;
         
         // Limpiar carrito después de enviar
@@ -320,8 +322,18 @@ HTML_TEMPLATE = """
         updateCartUI();
     }
 
-    // Inicializar el carrito al cargar la página
-    document.addEventListener('DOMContentLoaded', updateCartUI);
+    // Asignar el evento a todos los botones de agregar
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.btn-add-cart').forEach(button => {
+            button.addEventListener('click', function() {
+                let nombre = this.getAttribute('data-nombre');
+                let detal = this.getAttribute('data-detal');
+                let mayor = this.getAttribute('data-mayor');
+                let gran_mayor = this.getAttribute('data-granmayor');
+                addToCart(nombre, detal, mayor, gran_mayor);
+            });
+        });
+    });
     </script>
 </body>
 </html>
