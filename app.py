@@ -6,10 +6,9 @@ import io
 
 app = Flask(__name__)
 
-# ⚠️ PEGA AQUÍ TU ENLACE CSV
+# ⚠️ PEGA AQUÍ TU ENLACE CSV (Borra cualquier espacio o símbolo invisible antes del https)
 URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRAPuJtY8lL5Ikn-aOZpSiHyUz9slXX7a2AYtBCdDXBMeOfWQbuawPFrYMZbzQJ3GsYuXFaHDs3FiwA/pub?gid=1300626180&single=true&output=csv"
 
-# Funciones para limpiar los datos y evitar errores
 def limpiar_precio(val):
     try:
         if pd.isna(val) or val == '': return 0.0
@@ -55,11 +54,14 @@ def cargar_catalogo():
             stock = limpiar_stock(row.get('stock', 1))
             
             slug = nombre.lower().replace(' ', '-').replace("'", "").replace('"', '').replace('&', 'and')
-            imagen = f"/static/fotos/{slug}.jpg" 
+            
+            # --- BÚSQUEDA INTELIGENTE DE IMAGEN ---
+            imagen = f"/static/fotos/{slug}.jpg" # Valor por defecto
             
             if os.path.exists(ruta_carpeta):
                 for archivo in os.listdir(ruta_carpeta):
                     nombre_archivo, extension = os.path.splitext(archivo)
+                    # Comprueba si el nombre coincide y si la extensión es una imagen válida
                     if nombre_archivo == slug and extension.lower() in ['.jpg', '.jpeg', '.png', '.webp']:
                         imagen = f"/static/fotos/{archivo}"
                         break
@@ -96,8 +98,28 @@ HTML_TEMPLATE = """
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #f4f6f8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
-        .header-bg { background: linear-gradient(rgba(17, 24, 39, 0.7), rgba(17, 24, 39, 0.7)), url("{{ url_for('static', filename='fotos/banner.jpg') }}"); background-size: cover; background-position: center; color: white; text-align: center; border-bottom: 4px solid #d97706; padding: 3rem 1rem; }
-        .logo-header { width: 120px; height: 120px; object-fit: cover; margin-bottom: 15px; border-radius: 50%; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border: 4px solid #FFD700; background-color: #000; }
+        
+        .header-bg { 
+            background: linear-gradient(rgba(17, 24, 39, 0.7), rgba(17, 24, 39, 0.7)), url("{{ url_for('static', filename='fotos/banner.jpg') }}");
+            background-size: cover;
+            background-position: center;
+            color: white; 
+            text-align: center; 
+            border-bottom: 4px solid #d97706; 
+            padding: 3rem 1rem; 
+        }
+
+        .logo-header {
+            width: 120px;
+            height: 120px;
+            object-fit: cover; 
+            margin-bottom: 15px;
+            border-radius: 50%; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border: 4px solid #FFD700; /* Borde Dorado */
+            background-color: #000; 
+        }
+
         .card-perfume { border: none; border-radius: 12px; transition: transform 0.2s, box-shadow 0.2s; background: #ffffff; }
         .card-perfume:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
         .badge-brand { background-color: #f3f4f6; color: #374151; font-weight: 600; font-size: 0.75rem; padding: 0.35em 0.65em; border-radius: 6px; }
