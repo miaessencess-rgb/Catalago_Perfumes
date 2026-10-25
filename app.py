@@ -6,7 +6,7 @@ import io
 
 app = Flask(__name__)
 
-# ⚠️ PEGA AQUÍ TU ENLACE CSV (Borra cualquier espacio o símbolo invisible antes del https)
+# ⚠️ PEGA AQUÍ TU ENLACE CSV
 URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRAPuJtY8lL5Ikn-aOZpSiHyUz9slXX7a2AYtBCdDXBMeOfWQbuawPFrYMZbzQJ3GsYuXFaHDs3FiwA/pub?gid=1300626180&single=true&output=csv"
 
 def cargar_catalogo():
@@ -14,15 +14,11 @@ def cargar_catalogo():
     error_msg = ""
     
     try:
-        # Leer directamente desde Google Sheets
         req = urllib.request.Request(URL_CSV, headers={'User-Agent': 'Mozilla/5.0'})
         with urllib.request.urlopen(req) as response:
             data = response.read().decode('utf-8')
         
-        # Convertir el CSV a un DataFrame de Pandas
         df = pd.read_csv(io.StringIO(data))
-        
-        # Limpiar los nombres de las columnas por si Google Sheets metió espacios invisibles
         df.columns = df.columns.str.strip()
         
         ruta_carpeta = os.path.join(app.root_path, 'static', 'fotos')
@@ -38,8 +34,10 @@ def cargar_catalogo():
                 detal = float(row['precio_venta']) if pd.notna(row['precio_venta']) else 0.0
                 mayor = float(row['precio_mayor']) if pd.notna(row['precio_mayor']) else 0.0
                 gran_mayor = float(row['precio_gran_mayor']) if pd.notna(row['precio_gran_mayor']) else 0.0
+                # LEER EL STOCK
+                stock = int(float(row['stock'])) if pd.notna(row['stock']) else 1
             except Exception:
-                detal, mayor, gran_mayor = 0.0, 0.0, 0.0
+                detal, mayor, gran_mayor, stock = 0.0, 0.0, 0.0, 1
             
             slug = nombre.lower().replace(' ', '-').replace("'", "").replace('"', '').replace('&', 'and')
             imagen = f"/static/fotos/{slug}.jpg" 
@@ -65,11 +63,11 @@ def cargar_catalogo():
                 "mayor": mayor,
                 "gran_mayor": gran_mayor,
                 "genero": genero,
-                "imagen": imagen
+                "imagen": imagen,
+                "stock": stock # AQUI GUARDAMOS EL STOCK
             })
     except Exception as e:
         error_msg = str(e)
-        print(f"Error al cargar los datos: {e}")
         
     return catalogo, error_msg
 
@@ -93,8 +91,14 @@ HTML_TEMPLATE = """
         .price-label { color: #6b7280; font-size: 0.75rem; display: block; }
         .img-container { height: 140px; display: flex; align-items: center; justify-content: center; background-color: #fafafa; border-radius: 8px; overflow: hidden; margin-bottom: 10px; }
         .img-container img { max-height: 100%; max-width: 100%; object-fit: contain; }
+        
+        /* Estilos para producto agotado */
+        .card-agotado { opacity: 0.7; filter: grayscale(80%); }
+        .badge-agotado { position: absolute; top: 20px; right: 20px; background-color: #dc3545; color: white; font-weight: bold; font-size: 0.8rem; padding: 0.4em 0.7em; border-radius: 6px; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+
         .btn-whatsapp { background-color: #25D366; color: white; font-weight: bold; border: none; }
         .btn-whatsapp:hover { background-color: #1ebe57; color: white; }
+        .btn-agotado { background-color: #6c757d; color: white; font-weight: bold; border: none; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -108,8 +112,7 @@ HTML_TEMPLATE = """
     <div class="container pb-5">
         {% if error_msg %}
         <div class="alert alert-danger text-center">
-            <strong>Error al cargar los productos:</strong> {{ error_msg }}<br>
-            <small>Revisa que el enlace de Google Sheets sea el correcto y esté publicado como .csv</small>
+            <strong>Error al cargar los productos:</strong> {{ error_msg }}
         </div>
         {% endif %}
 
@@ -122,7 +125,15 @@ HTML_TEMPLATE = """
         <div class="row g-3" id="productList">
             {% for item in catalogo %}
             <div class="col-6 col-md-4 col-lg-3 product-item" data-search="{{ item.marca.lower() }} {{ item.producto.lower() }}">
-                <div class="card card-perfume h-100 p-3 shadow-sm d-flex flex-column justify-content-between">
+                
+                <!-- Si el stock es 0, aplicamos la clase de agotado -->
+                <div class="card card-perfume h-100 p-3 shadow-sm d-flex flex-column justify-content-between position-relative {% if item.stock <= 0 %}card-agotado{% endif %}">
+                    
+                    <!-- Etiqueta roja si está agotado -->
+                    {% if item.stock <= 0 %}
+                        <div class="badge-agotado">AGOTADO</div>
+                    {% endif %}
+
                     <div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="badge badge-brand text-uppercase">{{ item.marca }}</span>
@@ -152,9 +163,18 @@ HTML_TEMPLATE = """
                             <span class="price-label">Gran Mayor (15+):</span>
                             <span class="fw-bold text-primary">${{ "%.2f"|format(item.gran_mayor) }}</span>
                         </div>
-                        <a href="https://wa.me/584228490047?text=Hola,%20estoy%20interesado%20en%20el%20perfume:%20{{ item.producto | urlencode }}%20-%20Marca:%20{{ item.marca | urlencode }}.%20Precio%20Detal:%20${{ '%.2f'|format(item.detal) }}" target="_blank" class="btn btn-whatsapp btn-sm w-100">
-                           💬 Pedir por WhatsApp
-                        </a>
+                        
+                        <!-- BOTÓN DE WHATSAPP (Cambia si está agotado) -->
+                        {% if item.stock > 0 %}
+                            <a href="https://wa.me/584228490047?text=Hola,%20estoy%20interesado%20en%20el%20perfume:%20{{ item.producto | urlencode }}%20-%20Marca:%20{{ item.marca | urlencode }}.%20Precio%20Detal:%20${{ '%.2f'|format(item.detal) }}" target="_blank" class="btn btn-whatsapp btn-sm w-100">
+                               💬 Pedir por WhatsApp
+                            </a>
+                        {% else %}
+                            <button class="btn btn-agotado btn-sm w-100" disabled>
+                               ❌ Agotado por los momentos
+                            </button>
+                        {% endif %}
+                        
                     </div>
                 </div>
             </div>
