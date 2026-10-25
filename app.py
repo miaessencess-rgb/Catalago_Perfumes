@@ -53,7 +53,6 @@ def cargar_catalogo():
             slug = nombre.lower().replace(' ', '-').replace("'", "").replace('"', '').replace('&', 'and')
             imagen = f"/static/fotos/{slug}.jpg" 
             
-            # Búsqueda de imagen (acepta cualquier extensión)
             if os.path.exists(ruta_carpeta):
                 for archivo in os.listdir(ruta_carpeta):
                     nombre_archivo, extension = os.path.splitext(archivo)
@@ -91,6 +90,9 @@ HTML_TEMPLATE = """
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catálogo Digital de Perfumes</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Iconos para las redes sociales -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         body { background-color: #f4f6f8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
         
@@ -109,6 +111,30 @@ HTML_TEMPLATE = """
             margin-bottom: 15px; border-radius: 50%; 
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
             border: 4px solid #FFD700; background-color: #000; 
+        }
+
+        /* Estilo del botón de TikTok */
+        .tiktok-btn {
+            background-color: #000;
+            color: #fff;
+            text-decoration: none;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 2px solid #25F4EE; /* Azul TikTok */
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        .tiktok-btn:hover {
+            background-color: #111;
+            color: #FE2C55; /* Rojo TikTok */
+            border-color: #FE2C55;
+            transform: scale(1.05);
         }
 
         .card-perfume { border: none; border-radius: 12px; transition: transform 0.2s, box-shadow 0.2s; background: #ffffff; }
@@ -134,6 +160,12 @@ HTML_TEMPLATE = """
         <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Mi Logo" class="logo-header">
         <h1 class="fw-bold m-0">✨ Catálogo de Perfumes</h1>
         <p class="text-light opacity-75 mt-1 small">Detal, Mayor (6+ unds) y Gran Mayor (15+ unds)</p>
+        
+        <!-- AQUÍ ESTÁ EL BOTÓN DE TIKTOK -->
+        <a href="https://www.tiktok.com/@aroma2s" target="_blank" class="tiktok-btn">
+            <i class="fab fa-tiktok"></i> Síguenos en TikTok: @aroma2s
+        </a>
+        
     </div>
 
     <div class="container pb-5">
