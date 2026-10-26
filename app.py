@@ -207,21 +207,40 @@ HTML_TEMPLATE = """
         .btn-whatsapp:hover { background-color: #1ebe57; color: white; transform: scale(1.02); box-shadow: 0 0 15px rgba(37, 211, 102, 0.4); }
         .btn-agotado { background-color: #333; color: #888; font-weight: 600; border: none; cursor: not-allowed; border-radius: 8px; }
         
-        /* NOMBRE DEL PRODUCTO EN BLANCO PURO */
+        /* ========================================= */
+        /* NUEVO ESTILO: NOMBRE DEL PRODUCTO (DEGRADADO NEGRO A BLANCO) */
+        /* ========================================= */
         .card-title { 
-            color: #ffffff !important; 
             font-weight: 700;
             font-size: 0.95rem;
             margin-bottom: 4px;
+            
+            /* Efecto Degradado */
+            background: linear-gradient(to bottom, #000000 0%, #ffffff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent !important; /* Hace que el color base sea invisible para mostrar el degradado */
+            
+            /* Sombra sutil para que resalte en el fondo oscuro */
+            filter: drop-shadow(0px 2px 2px rgba(255,255,255,0.15));
         }
 
-        /* DESCRIPCIÓN EN GRIS CLARO */
+        /* ========================================= */
+        /* NUEVO ESTILO: DESCRIPCIÓN (DEGRADADO NEGRO A BLANCO) */
+        /* ========================================= */
         .descripcion-texto { 
             font-size: 0.75rem; 
-            color: #d1d5db !important; 
             font-weight: 400; 
             line-height: 1.4; 
             margin-bottom: 10px; 
+            
+            /* Efecto Degradado */
+            background: linear-gradient(to bottom, #000000 0%, #ffffff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent !important;
+            
+            filter: drop-shadow(0px 1px 1px rgba(255,255,255,0.1));
         }
     </style>
 </head>
