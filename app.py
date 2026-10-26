@@ -161,11 +161,12 @@ HTML_TEMPLATE = """
         .search-pill::placeholder { color: #888; }
         .search-pill:focus { background-color: #222; color: white; box-shadow: 0 4px 20px rgba(255, 215, 0, 0.2); border-color: #FFD700; outline: none; }
 
+        /* TARJETA DE UN SOLO COLOR OSCURO (SIN DEGRADADO BLANCO) */
         .card-perfume { 
             border: 1px solid rgba(255, 255, 255, 0.1); 
             border-radius: 15px; 
             transition: transform 0.3s, box-shadow 0.3s; 
-            background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 25%, #1a1a1a 45%, #0a0a0a 100%);
+            background-color: #1a1a1a; /* Fondo oscuro sólido */
             color: white;
             overflow: hidden;
         }
@@ -175,23 +176,24 @@ HTML_TEMPLATE = """
             border-color: rgba(255, 215, 0, 0.3);
         }
         
-        .badge-brand { background-color: #f3f4f6; color: #374151; font-weight: 600; font-size: 0.75rem; padding: 0.35em 0.65em; border-radius: 6px; }
+        .badge-brand { background-color: #333; color: #FFD700; font-weight: 600; font-size: 0.75rem; padding: 0.35em 0.65em; border-radius: 6px; }
         
         .price-box { 
-            background-color: rgba(0, 0, 0, 0.6); 
+            background-color: rgba(0, 0, 0, 0.4); 
             border-radius: 10px; 
             padding: 12px; 
-            border: 1px solid rgba(255, 255, 255, 0.1); 
+            border: 1px solid rgba(255, 255, 255, 0.05); 
         }
         .price-detal { font-weight: 700; color: #4ade80; font-size: 1.1rem; }
         .price-label { color: #9ca3af; font-size: 0.75rem; display: block; }
         
+        /* CONTENEDOR DE LA IMAGEN CON FONDO BLANCO (solo para la foto) */
         .img-container { 
             height: 140px; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            background-color: #ffffff; 
+            background-color: #ffffff; /* Fondo blanco solo aquí */
             border-radius: 8px; 
             overflow: hidden; 
             margin-bottom: 10px; 
@@ -205,19 +207,19 @@ HTML_TEMPLATE = """
         .btn-whatsapp:hover { background-color: #1ebe57; color: white; transform: scale(1.02); box-shadow: 0 0 15px rgba(37, 211, 102, 0.4); }
         .btn-agotado { background-color: #333; color: #888; font-weight: 600; border: none; cursor: not-allowed; border-radius: 8px; }
         
-        /* NOMBRE DEL PRODUCTO EN NEGRO SÓLIDO */
+        /* NOMBRE DEL PRODUCTO EN BLANCO PURO */
         .card-title { 
-            color: #000000 !important; 
+            color: #ffffff !important; 
             font-weight: 700;
             font-size: 0.95rem;
             margin-bottom: 4px;
         }
 
-        /* DESCRIPCIÓN EN NEGRO SÓLIDO */
+        /* DESCRIPCIÓN EN GRIS CLARO */
         .descripcion-texto { 
             font-size: 0.75rem; 
-            color: #000000 !important; 
-            font-weight: 500; 
+            color: #d1d5db !important; 
+            font-weight: 400; 
             line-height: 1.4; 
             margin-bottom: 10px; 
         }
