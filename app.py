@@ -164,14 +164,12 @@ HTML_TEMPLATE = """
 
         /* TARJETA CON DEGRADADO Y TRANSPARENCIA (EFECTO CRISTAL) */
         .card-perfume { 
-            border: 1px solid rgba(255, 255, 255, 0.15); /* Borde sutil */
+            border: 1px solid rgba(255, 255, 255, 0.15); 
             border-radius: 15px; 
             transition: transform 0.3s, box-shadow 0.3s; 
             
-            /* Degradado con transparencia: Blanco semi-transparente a Negro semi-transparente */
             background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 45%, rgba(26, 26, 26, 0.85) 65%, rgba(10, 10, 10, 0.95) 100%);
             
-            /* Efecto de desenfoque de fondo para que se vea como vidrio */
             backdrop-filter: blur(10px); 
             -webkit-backdrop-filter: blur(10px);
             
@@ -186,7 +184,6 @@ HTML_TEMPLATE = """
         
         .badge-brand { background-color: rgba(51, 51, 51, 0.8); color: #FFD700; font-weight: 600; font-size: 0.75rem; padding: 0.35em 0.65em; border-radius: 6px; }
         
-        /* CAJA DE PRECIOS TRANSPARENTE */
         .price-box { 
             background-color: rgba(0, 0, 0, 0.5); 
             border-radius: 10px; 
@@ -342,3 +339,13 @@ HTML_TEMPLATE = """
     </script>
 </body>
 </html>
+"""
+
+@app.route('/')
+def home():
+    catalogo, error_msg = cargar_catalogo()
+    return render_template_string(HTML_TEMPLATE, catalogo=catalogo, error_msg=error_msg)
+
+if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
