@@ -6,7 +6,7 @@ import io
 
 app = Flask(__name__)
 
-# ⚠️ TU ENLACE CSV
+# ⚠️ PEGA AQUÍ TU ENLACE CSV
 URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRAPuJtY8lL5Ikn-aOZpSiHyUz9slXX7a2AYtBCdDXBMeOfWQbuawPFrYMZbzQJ3GsYuXFaHDs3FiwA/pub?gid=1300626180&single=true&output=csv"
 
 def limpiar_precio(val):
@@ -41,6 +41,10 @@ def cargar_catalogo():
         for _, row in df.iterrows():
             nombre = str(row.get('Nombre', '')).strip()
             marca = str(row.get('marca', '')).strip()
+            descripcion = str(row.get('descripcion', '')).strip()
+            
+            if descripcion == 'nan' or not descripcion:
+                descripcion = ""
             
             if not nombre or nombre == 'nan':
                 continue
@@ -70,6 +74,7 @@ def cargar_catalogo():
             catalogo.append({
                 "marca": marca,
                 "producto": nombre,
+                "descripcion": descripcion,
                 "detal": detal,
                 "mayor": mayor,
                 "gran_mayor": gran_mayor,
@@ -90,9 +95,7 @@ HTML_TEMPLATE = """
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catálogo Digital de Perfumes | Aroma2</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Iconos para TikTok -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Tipografía Premium -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <style>
@@ -115,7 +118,6 @@ HTML_TEMPLATE = """
             border: 4px solid #FFD700; background-color: #000; 
         }
 
-        /* Botón de TikTok elegante */
         .tiktok-btn {
             background-color: rgba(0, 0, 0, 0.8);
             color: #fff;
@@ -127,7 +129,7 @@ HTML_TEMPLATE = """
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            border: 2px solid #FFD700; /* Borde dorado */
+            border: 2px solid #FFD700;
             box-shadow: 0 4px 10px rgba(0,0,0,0.4);
             transition: all 0.3s ease;
             margin-top: 15px;
@@ -138,7 +140,6 @@ HTML_TEMPLATE = """
             transform: translateY(-2px);
         }
 
-        /* Barra de búsqueda tipo píldora */
         .search-pill {
             border-radius: 50px !important;
             border: none;
@@ -156,7 +157,6 @@ HTML_TEMPLATE = """
         
         .badge-brand { background-color: #f3f4f6; color: #374151; font-weight: 600; font-size: 0.75rem; padding: 0.35em 0.65em; border-radius: 6px; }
         
-        /* Caja de precios más limpia */
         .price-box { 
             background-color: #f8f9fa; 
             border-radius: 10px; 
@@ -175,6 +175,14 @@ HTML_TEMPLATE = """
         .btn-whatsapp { background-color: #25D366; color: white; font-weight: 600; border: none; border-radius: 8px; transition: 0.2s; }
         .btn-whatsapp:hover { background-color: #1ebe57; color: white; transform: scale(1.02); }
         .btn-agotado { background-color: #6c757d; color: white; font-weight: 600; border: none; cursor: not-allowed; border-radius: 8px; }
+        
+        .descripcion-texto {
+            font-size: 0.75rem;
+            color: #6b7280;
+            font-weight: 300;
+            line-height: 1.3;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -184,7 +192,6 @@ HTML_TEMPLATE = """
         <h1 class="fw-bold m-0" style="letter-spacing: 1px;">✨ Catálogo de Perfumes</h1>
         <p class="text-light opacity-75 mt-2 small" style="font-weight: 300;">Detal, Mayor (6+ unds) y Gran Mayor (15+ unds)</p>
         
-        <!-- BOTÓN DE TIKTOK -->
         <a href="https://www.tiktok.com/@aroma2s" target="_blank" class="tiktok-btn">
             <i class="fab fa-tiktok"></i> Síguenos en TikTok: @aroma2s
         </a>
@@ -205,7 +212,7 @@ HTML_TEMPLATE = """
 
         <div class="row g-3" id="productList">
             {% for item in catalogo %}
-            <div class="col-6 col-md-4 col-lg-3 product-item" data-search="{{ item.marca.lower() }} {{ item.producto.lower() }}">
+            <div class="col-6 col-md-4 col-lg-3 product-item" data-search="{{ item.marca.lower() }} {{ item.producto.lower() }} {{ item.descripcion.lower() }}">
                 
                 <div class="card card-perfume h-100 p-3 shadow-sm d-flex flex-column justify-content-between position-relative {% if item.stock <= 0 %}card-agotado{% endif %}">
                     
@@ -227,7 +234,13 @@ HTML_TEMPLATE = """
                         <div class="img-container">
                             <img src="{{ item.imagen }}" onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\'text-muted small\'>📷 Sin imagen</span>';" alt="{{ item.producto }}">
                         </div>
-                        <h6 class="card-title fw-bold text-dark mb-3" style="font-size: 0.95rem; min-height: 2.2em;">{{ item.producto }}</h6>
+                        <h6 class="card-title fw-bold text-dark mb-1" style="font-size: 0.95rem;">{{ item.producto }}</h6>
+                        
+                        <!-- AQUÍ SE MUESTRA LA DESCRIPCIÓN -->
+                        {% if item.descripcion %}
+                            <p class="descripcion-texto">{{ item.descripcion }}</p>
+                        {% endif %}
+                        
                     </div>
                     
                     <div class="price-box mt-auto">
