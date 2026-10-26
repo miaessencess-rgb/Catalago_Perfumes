@@ -162,26 +162,33 @@ HTML_TEMPLATE = """
         .search-pill::placeholder { color: #888; }
         .search-pill:focus { background-color: #222; color: white; box-shadow: 0 4px 20px rgba(255, 215, 0, 0.2); border-color: #FFD700; outline: none; }
 
-        /* TARJETA CON DEGRADADO: BLANCO ARRIBA -> NEGRO ABAJO */
+        /* TARJETA CON DEGRADADO Y TRANSPARENCIA (EFECTO CRISTAL) */
         .card-perfume { 
-            border: 1px solid rgba(255, 255, 255, 0.1); 
+            border: 1px solid rgba(255, 255, 255, 0.15); /* Borde sutil */
             border-radius: 15px; 
             transition: transform 0.3s, box-shadow 0.3s; 
-            /* Degradado extendido: Blanco hasta el 50% para que el texto se lea bien */
-            background: linear-gradient(180deg, #ffffff 0%, #ffffff 45%, #1a1a1a 65%, #0a0a0a 100%);
+            
+            /* Degradado con transparencia: Blanco semi-transparente a Negro semi-transparente */
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 45%, rgba(26, 26, 26, 0.85) 65%, rgba(10, 10, 10, 0.95) 100%);
+            
+            /* Efecto de desenfoque de fondo para que se vea como vidrio */
+            backdrop-filter: blur(10px); 
+            -webkit-backdrop-filter: blur(10px);
+            
             color: white;
             overflow: hidden;
         }
         .card-perfume:hover { 
             transform: translateY(-5px); 
-            box-shadow: 0 12px 25px rgba(255, 215, 0, 0.15); 
-            border-color: rgba(255, 215, 0, 0.3);
+            box-shadow: 0 12px 25px rgba(255, 215, 0, 0.2); 
+            border-color: rgba(255, 215, 0, 0.4);
         }
         
-        .badge-brand { background-color: #333; color: #FFD700; font-weight: 600; font-size: 0.75rem; padding: 0.35em 0.65em; border-radius: 6px; }
+        .badge-brand { background-color: rgba(51, 51, 51, 0.8); color: #FFD700; font-weight: 600; font-size: 0.75rem; padding: 0.35em 0.65em; border-radius: 6px; }
         
+        /* CAJA DE PRECIOS TRANSPARENTE */
         .price-box { 
-            background-color: rgba(0, 0, 0, 0.6); 
+            background-color: rgba(0, 0, 0, 0.5); 
             border-radius: 10px; 
             padding: 12px; 
             border: 1px solid rgba(255, 255, 255, 0.1); 
@@ -206,7 +213,7 @@ HTML_TEMPLATE = """
 
         .btn-whatsapp { background-color: #25D366; color: white; font-weight: 600; border: none; border-radius: 8px; transition: 0.2s; }
         .btn-whatsapp:hover { background-color: #1ebe57; color: white; transform: scale(1.02); box-shadow: 0 0 15px rgba(37, 211, 102, 0.4); }
-        .btn-agotado { background-color: #333; color: #888; font-weight: 600; border: none; cursor: not-allowed; border-radius: 8px; }
+        .btn-agotado { background-color: rgba(51, 51, 51, 0.8); color: #888; font-weight: 600; border: none; cursor: not-allowed; border-radius: 8px; }
         
         /* NOMBRE DEL PRODUCTO EN NEGRO SÓLIDO */
         .card-title { 
@@ -223,7 +230,6 @@ HTML_TEMPLATE = """
             line-height: 1.4; 
             margin-bottom: 10px; 
             
-            /* El degradado de color para el texto */
             background: linear-gradient(180deg, #000000 0%, #000000 30%, #ffffff 100%);
             -webkit-background-clip: text;
             background-clip: text;
@@ -336,13 +342,3 @@ HTML_TEMPLATE = """
     </script>
 </body>
 </html>
-"""
-
-@app.route('/')
-def home():
-    catalogo, error_msg = cargar_catalogo()
-    return render_template_string(HTML_TEMPLATE, catalogo=catalogo, error_msg=error_msg)
-
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
