@@ -161,6 +161,7 @@ HTML_TEMPLATE = """
         .search-pill::placeholder { color: #888; }
         .search-pill:focus { background-color: #222; color: white; box-shadow: 0 4px 20px rgba(255, 215, 0, 0.2); border-color: #FFD700; outline: none; }
 
+        /* TARJETA CON EL DEGRADADO ORIGINAL */
         .card-perfume { 
             border: 1px solid rgba(255, 255, 255, 0.1); 
             border-radius: 15px; 
@@ -205,31 +206,21 @@ HTML_TEMPLATE = """
         .btn-whatsapp:hover { background-color: #1ebe57; color: white; transform: scale(1.02); box-shadow: 0 0 15px rgba(37, 211, 102, 0.4); }
         .btn-agotado { background-color: #333; color: #888; font-weight: 600; border: none; cursor: not-allowed; border-radius: 8px; }
         
-        /* NOMBRE DEL PERFUME: DEGRADADO DE NEGRO A BLANCO */
+        /* NOMBRE DEL PRODUCTO EN NEGRO SÓLIDO */
         .card-title { 
+            color: #000000 !important; 
             font-weight: 700;
             font-size: 0.95rem;
             margin-bottom: 4px;
-            /* Degradado de Negro arriba a Blanco abajo */
-            background: linear-gradient(180deg, #000000 0%, #000000 20%, #ffffff 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            color: transparent;
         }
 
-        /* DESCRIPCIÓN: DEGRADADO DE NEGRO A BLANCO MÁS SUAVE */
+        /* DESCRIPCIÓN EN NEGRO SÓLIDO (UN POCO MÁS SUAVE PARA NO CANSAR) */
         .descripcion-texto { 
             font-size: 0.75rem; 
+            color: #333333 !important; /* Negro suave */
             font-weight: 500; 
             line-height: 1.4; 
             margin-bottom: 10px; 
-            /* Degradado de Gris oscuro a Blanco */
-            background: linear-gradient(180deg, #111111 0%, #111111 10%, #ffffff 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            color: transparent;
         }
     </style>
 </head>
@@ -285,6 +276,7 @@ HTML_TEMPLATE = """
                             <img src="{{ item.imagen }}" onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\'text-muted small\'>📷 Sin imagen</span>';" alt="{{ item.producto }}">
                         </div>
                         
+                        <!-- NOMBRE Y DESCRIPCIÓN EN NEGRO -->
                         <h6 class="card-title fw-bold">{{ item.producto }}</h6>
                         
                         {% if item.descripcion %}
