@@ -298,3 +298,12 @@ HTML_TEMPLATE = """
     </script>
 </body>
 </html>
+"""
+@app.route('/')
+def home():
+    catalogo, error_msg = cargar_catalogo()
+    return render_template_string(HTML_TEMPLATE, catalogo=catalogo, error_msg=error_msg)
+
+if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
