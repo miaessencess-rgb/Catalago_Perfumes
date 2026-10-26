@@ -162,14 +162,14 @@ HTML_TEMPLATE = """
         .search-pill::placeholder { color: #888; }
         .search-pill:focus { background-color: #222; color: white; box-shadow: 0 4px 20px rgba(255, 215, 0, 0.2); border-color: #FFD700; outline: none; }
 
-        /* TARJETA: BLANCO SOLO ARRIBA (FOTO), NEGRO DESDE EL TEXTO */
+        /* TARJETA CON DEGRADADO REAL Y SUAVE (SIN CORTE) */
         .card-perfume { 
             border: 1px solid rgba(255, 255, 255, 0.15); 
             border-radius: 15px; 
             transition: transform 0.3s, box-shadow 0.3s; 
             
-            /* El blanco termina en 140px (justo el alto de la foto), luego pasa a negro */
-            background: linear-gradient(180deg, #ffffff 0%, #ffffff 140px, #1a1a1a 141px, #0a0a0a 100%);
+            /* El blanco se mantiene hasta abajo de la foto (40%), luego se funde suavemente al negro */
+            background: linear-gradient(180deg, #ffffff 0%, #ffffff 38%, #1a1a1a 55%, #0a0a0a 100%);
             
             color: white;
             overflow: hidden;
@@ -210,21 +210,26 @@ HTML_TEMPLATE = """
         .btn-whatsapp:hover { background-color: #1ebe57; color: white; transform: scale(1.02); box-shadow: 0 0 15px rgba(37, 211, 102, 0.4); }
         .btn-agotado { background-color: rgba(51, 51, 51, 0.8); color: #888; font-weight: 600; border: none; cursor: not-allowed; border-radius: 8px; }
         
-        /* NOMBRE DEL PRODUCTO EN BLANCO (porque ahora el fondo es negro) */
+        /* NOMBRE DEL PRODUCTO EN NEGRO SÓLIDO (PARA LA PARTE BLANCA) */
         .card-title { 
-            color: #ffffff !important; 
+            color: #000000 !important; 
             font-weight: 700;
             font-size: 0.95rem;
             margin-bottom: 4px;
         }
 
-        /* DESCRIPCIÓN EN GRIS CLARO (porque ahora el fondo es negro) */
+        /* DESCRIPCIÓN CON DEGRADADO (NEGRO ARRIBA -> BLANCO ABAJO) */
         .descripcion-texto { 
             font-size: 0.75rem; 
-            color: #d1d5db !important; 
-            font-weight: 400; 
+            font-weight: 500; 
             line-height: 1.4; 
             margin-bottom: 10px; 
+            
+            background: linear-gradient(180deg, #000000 0%, #000000 30%, #ffffff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
         }
     </style>
 </head>
