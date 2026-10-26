@@ -168,7 +168,7 @@ HTML_TEMPLATE = """
             border-radius: 15px; 
             transition: transform 0.3s, box-shadow 0.3s; 
             
-            /* El blanco se mantiene hasta abajo de la foto (40%), luego se funde suavemente al negro */
+            /* El blanco se mantiene hasta abajo de la foto (38%), luego se funde suavemente al negro */
             background: linear-gradient(180deg, #ffffff 0%, #ffffff 38%, #1a1a1a 55%, #0a0a0a 100%);
             
             color: white;
@@ -218,18 +218,13 @@ HTML_TEMPLATE = """
             margin-bottom: 4px;
         }
 
-        /* DESCRIPCIÓN CON DEGRADADO (NEGRO ARRIBA -> BLANCO ABAJO) */
+        /* DESCRIPCIÓN EN NEGRO SÓLIDO (PARA LA PARTE BLANCA) */
         .descripcion-texto { 
             font-size: 0.75rem; 
+            color: #000000 !important; 
             font-weight: 500; 
             line-height: 1.4; 
             margin-bottom: 10px; 
-            
-            background: linear-gradient(180deg, #000000 0%, #000000 30%, #ffffff 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            color: transparent;
         }
     </style>
 </head>
