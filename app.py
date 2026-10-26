@@ -161,7 +161,6 @@ HTML_TEMPLATE = """
         .search-pill::placeholder { color: #888; }
         .search-pill:focus { background-color: #222; color: white; box-shadow: 0 4px 20px rgba(255, 215, 0, 0.2); border-color: #FFD700; outline: none; }
 
-        /* TARJETA CON EL DEGRADADO ORIGINAL */
         .card-perfume { 
             border: 1px solid rgba(255, 255, 255, 0.1); 
             border-radius: 15px; 
@@ -206,19 +205,25 @@ HTML_TEMPLATE = """
         .btn-whatsapp:hover { background-color: #1ebe57; color: white; transform: scale(1.02); box-shadow: 0 0 15px rgba(37, 211, 102, 0.4); }
         .btn-agotado { background-color: #333; color: #888; font-weight: 600; border: none; cursor: not-allowed; border-radius: 8px; }
         
-        /* NOMBRE DEL PRODUCTO EN NEGRO SÓLIDO */
+        /* PRUEBA EXTREMA: NOMBRE EN ROJO CON FONDO AMARILLO */
         .card-title { 
-            color: #000000 !important; 
-            font-weight: 700;
+            color: #ff0000 !important; /* Rojo puro */
+            background-color: #ffff00; /* Fondo amarillo */
+            font-weight: 900;
+            padding: 5px;
+            border-radius: 5px;
             font-size: 0.95rem;
-            margin-bottom: 4px;
+            margin-bottom: 5px;
         }
 
-        /* DESCRIPCIÓN EN NEGRO SÓLIDO (UN POCO MÁS SUAVE PARA NO CANSAR) */
+        /* PRUEBA EXTREMA: DESCRIPCIÓN EN AZUL CON FONDO CELESTE */
         .descripcion-texto { 
             font-size: 0.75rem; 
-            color: #333333 !important; /* Negro suave */
-            font-weight: 500; 
+            color: #0000ff !important; /* Azul puro */
+            background-color: #87ceeb; /* Fondo celeste */
+            font-weight: 900; 
+            padding: 5px;
+            border-radius: 5px;
             line-height: 1.4; 
             margin-bottom: 10px; 
         }
@@ -276,7 +281,6 @@ HTML_TEMPLATE = """
                             <img src="{{ item.imagen }}" onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\'text-muted small\'>📷 Sin imagen</span>';" alt="{{ item.producto }}">
                         </div>
                         
-                        <!-- NOMBRE Y DESCRIPCIÓN EN NEGRO -->
                         <h6 class="card-title fw-bold">{{ item.producto }}</h6>
                         
                         {% if item.descripcion %}
