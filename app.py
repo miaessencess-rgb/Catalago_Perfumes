@@ -168,7 +168,6 @@ HTML_TEMPLATE = """
             border-radius: 15px; 
             transition: transform 0.3s, box-shadow 0.3s; 
             
-            /* Degradado: Blanco hasta abajo de la foto (40%), luego fundido a negro */
             background: linear-gradient(180deg, #ffffff 0%, #ffffff 40%, #1a1a1a 60%, #0a0a0a 100%);
             
             color: white;
@@ -180,7 +179,15 @@ HTML_TEMPLATE = """
             border-color: rgba(255, 215, 0, 0.4);
         }
         
-        .badge-brand { background-color: rgba(51, 51, 51, 0.8); color: #FFD700; font-weight: 600; font-size: 0.75rem; padding: 0.35em 0.65em; border-radius: 6px; }
+        /* ETIQUETA DE LA MARCA: BLANCA CON LETRA GRIS */
+        .badge-brand { 
+            background-color: #f3f4f6; 
+            color: #374151; 
+            font-weight: 600; 
+            font-size: 0.75rem; 
+            padding: 0.35em 0.65em; 
+            border-radius: 6px; 
+        }
         
         .price-box { 
             background-color: rgba(0, 0, 0, 0.5); 
