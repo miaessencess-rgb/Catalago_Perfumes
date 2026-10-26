@@ -41,13 +41,36 @@ def cargar_catalogo():
         for _, row in df.iterrows():
             nombre = str(row.get('Nombre', '')).strip()
             marca = str(row.get('marca', '')).strip()
-            descripcion = str(row.get('descripcion', '')).strip()
+            descripcion_original = str(row.get('descripcion', '')).strip()
             
-            if descripcion == 'nan' or not descripcion:
-                descripcion = ""
+            if descripcion_original == 'nan' or not descripcion_original:
+                descripcion_original = ""
             
             if not nombre or nombre == 'nan':
                 continue
+
+            # --- LÓGICA DE LA ETIQUETA SECRETA ---
+            genero = 'Unisex'
+            descripcion_limpia = descripcion_original
+            
+            # Revisamos si la descripción empieza con la etiqueta
+            if descripcion_original.startswith('[H]'):
+                genero = 'Hombre'
+                descripcion_limpia = descripcion_original[3:].strip()
+            elif descripcion_original.startswith('[M]'):
+                genero = 'Mujer'
+                descripcion_limpia = descripcion_original[3:].strip()
+            elif descripcion_original.startswith('[U]'):
+                genero = 'Unisex'
+                descripcion_limpia = descripcion_original[3:].strip()
+            else:
+                # Si no hay etiqueta, usamos la lógica automática original
+                nombre_lower = nombre.lower()
+                if any(w in nombre_lower for w in ['men', 'man', 'hombre', 'sauvage', 'eros', 'bleu', 'one million', 'bad boy', 'elixir']):
+                    genero = 'Hombre'
+                elif any(w in nombre_lower for w in ['fem', 'woman', 'girl', 'yara', 'good girl', 'libre', 'black opium', 'oud gold']):
+                    genero = 'Mujer'
+            # -------------------------------------
 
             detal = limpiar_precio(row.get('precio_venta', 0))
             mayor = limpiar_precio(row.get('precio_mayor', 0))
@@ -63,22 +86,15 @@ def cargar_catalogo():
                     if nombre_archivo.lower() == slug.lower():
                         imagen = f"/static/fotos/{archivo}"
                         break
-            
-            nombre_lower = nombre.lower()
-            genero = 'Unisex'
-            if any(w in nombre_lower for w in ['men', 'man', 'hombre', 'sauvage', 'eros', 'bleu', 'one million', 'bad boy', 'elixir']):
-                genero = 'Hombre'
-            elif any(w in nombre_lower for w in ['fem', 'woman', 'girl', 'yara', 'good girl', 'libre', 'black opium', 'oud gold']):
-                genero = 'Mujer'
                 
             catalogo.append({
                 "marca": marca,
                 "producto": nombre,
-                "descripcion": descripcion,
+                "descripcion": descripcion_limpia,
+                "genero": genero,
                 "detal": detal,
                 "mayor": mayor,
                 "gran_mayor": gran_mayor,
-                "genero": genero,
                 "imagen": imagen,
                 "stock": stock
             })
@@ -223,6 +239,7 @@ HTML_TEMPLATE = """
                     <div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="badge badge-brand text-uppercase">{{ item.marca }}</span>
+                            
                             {% if item.genero == 'Mujer' %}
                                 <span class="badge bg-danger-subtle text-danger" style="font-size:0.7rem;">Mujer</span>
                             {% elif item.genero == 'Hombre' %}
@@ -230,13 +247,13 @@ HTML_TEMPLATE = """
                             {% else %}
                                 <span class="badge bg-warning-subtle text-warning-emphasis" style="font-size:0.7rem;">Unisex</span>
                             {% endif %}
+                            
                         </div>
                         <div class="img-container">
                             <img src="{{ item.imagen }}" onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\'text-muted small\'>📷 Sin imagen</span>';" alt="{{ item.producto }}">
                         </div>
                         <h6 class="card-title fw-bold text-dark mb-1" style="font-size: 0.95rem;">{{ item.producto }}</h6>
                         
-                        <!-- AQUÍ SE MUESTRA LA DESCRIPCIÓN -->
                         {% if item.descripcion %}
                             <p class="descripcion-texto">{{ item.descripcion }}</p>
                         {% endif %}
