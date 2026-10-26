@@ -161,13 +161,12 @@ HTML_TEMPLATE = """
         .search-pill::placeholder { color: #888; }
         .search-pill:focus { background-color: #222; color: white; box-shadow: 0 4px 20px rgba(255, 215, 0, 0.2); border-color: #FFD700; outline: none; }
 
-        /* TARJETA CON DEGRADADO BLANCO ARRIBA Y OSCURO ABAJO */
+        /* TARJETA CON DEGRADADO: BLANCO ARRIBA -> OSCURO ABAJO */
         .card-perfume { 
             border: 1px solid rgba(255, 255, 255, 0.1); 
             border-radius: 15px; 
             transition: transform 0.3s, box-shadow 0.3s; 
-            /* Blanco en la foto, oscuro para los precios */
-            background: linear-gradient(180deg, #ffffff 0%, #ffffff 40%, #1a1a1a 55%, #0a0a0a 100%);
+            background: linear-gradient(180deg, #ffffff 0%, #e5e7eb 35%, #1a1a1a 55%, #0a0a0a 100%);
             color: white;
             overflow: hidden;
         }
@@ -180,7 +179,7 @@ HTML_TEMPLATE = """
         .badge-brand { background-color: #f3f4f6; color: #374151; font-weight: 600; font-size: 0.75rem; padding: 0.35em 0.65em; border-radius: 6px; }
         
         .price-box { 
-            background-color: rgba(0, 0, 0, 0.5); 
+            background-color: rgba(0, 0, 0, 0.6); 
             border-radius: 10px; 
             padding: 12px; 
             border: 1px solid rgba(255, 255, 255, 0.1); 
@@ -207,17 +206,32 @@ HTML_TEMPLATE = """
         .btn-whatsapp:hover { background-color: #1ebe57; color: white; transform: scale(1.02); box-shadow: 0 0 15px rgba(37, 211, 102, 0.4); }
         .btn-agotado { background-color: #333; color: #888; font-weight: 600; border: none; cursor: not-allowed; border-radius: 8px; }
         
-        /* LETRAS NEGRAS PARA EL NOMBRE Y DESCRIPCIÓN EN LA PARTE CLARA */
+        /* TEXTO CON DEGRADADO: NEGRO ARRIBA -> BLANCO ABAJO */
         .card-title { 
-            color: #000000 !important; /* Negro puro */
             font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+            /* Aplicamos el degradado al texto */
+            background: linear-gradient(180deg, #000000 0%, #000000 40%, #ffffff 100%);
+            -webkit-background-clip: text; /* Para Chrome/Safari */
+            background-clip: text; /* Estándar */
+            -webkit-text-fill-color: transparent; /* Hace que el texto tome el color del fondo */
+            color: transparent;
+            /* Un pequeño truco para que no se pierda si el navegador no soporta el clip */
+            text-shadow: 0px 1px 2px rgba(255, 255, 255, 0.2); 
         }
+
         .descripcion-texto { 
             font-size: 0.75rem; 
-            color: #374151; /* Gris muy oscuro */
             font-weight: 400; 
             line-height: 1.4; 
             margin-bottom: 10px; 
+            /* Degradado para la descripción */
+            background: linear-gradient(180deg, #374151 0%, #6b7280 40%, #e5e7eb 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
         }
     </style>
 </head>
@@ -272,7 +286,9 @@ HTML_TEMPLATE = """
                         <div class="img-container">
                             <img src="{{ item.imagen }}" onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\'text-muted small\'>📷 Sin imagen</span>';" alt="{{ item.producto }}">
                         </div>
-                        <h6 class="card-title fw-bold mb-1" style="font-size: 0.95rem;">{{ item.producto }}</h6>
+                        
+                        <!-- NOMBRE Y DESCRIPCIÓN CON DEGRADADO -->
+                        <h6 class="card-title fw-bold">{{ item.producto }}</h6>
                         
                         {% if item.descripcion %}
                             <p class="descripcion-texto">{{ item.descripcion }}</p>
