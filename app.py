@@ -112,27 +112,28 @@ HTML_TEMPLATE = """
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <style>
-        body { background-color: #f4f6f8; font-family: 'Poppins', sans-serif; margin: 0; padding: 0; }
+        /* FONDO GENERAL NEGRO SÓLIDO */
+        body { background-color: #0a0a0a; font-family: 'Poppins', sans-serif; margin: 0; padding: 0; }
         
         .header-bg { 
-            background: linear-gradient(rgba(17, 24, 39, 0.7), rgba(17, 24, 39, 0.7)), url("{{ url_for('static', filename='fotos/banner.jpg') }}");
+            background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url("{{ url_for('static', filename='fotos/banner.jpg') }}");
             background-size: cover;
             background-position: center;
             color: white; 
             text-align: center; 
-            border-bottom: 4px solid #d97706; 
+            border-bottom: 4px solid #FFD700;
             padding: 3rem 1rem; 
         }
 
         .logo-header {
             width: 120px; height: 120px; object-fit: cover; 
             margin-bottom: 15px; border-radius: 50%; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
             border: 4px solid #FFD700; background-color: #000; 
         }
 
         .tiktok-btn {
-            background-color: rgba(0, 0, 0, 0.8);
+            background-color: rgba(255, 255, 255, 0.1);
             color: #fff;
             text-decoration: none;
             padding: 8px 24px;
@@ -151,47 +152,83 @@ HTML_TEMPLATE = """
 
         .search-pill {
             border-radius: 50px !important;
-            border: none;
+            border: 1px solid #333;
+            background-color: #1a1a1a;
+            color: white;
             padding: 15px 25px;
             font-size: 1.1rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
-        .search-pill:focus {
-            box-shadow: 0 4px 20px rgba(217, 119, 6, 0.2);
-            outline: none;
-        }
+        .search-pill::placeholder { color: #888; }
+        .search-pill:focus { background-color: #222; color: white; box-shadow: 0 4px 20px rgba(255, 215, 0, 0.2); border-color: #FFD700; outline: none; }
 
-        .card-perfume { border: none; border-radius: 12px; transition: transform 0.2s, box-shadow 0.2s; background: #ffffff; }
-        .card-perfume:hover { transform: translateY(-5px); box-shadow: 0 12px 25px rgba(0,0,0,0.1); }
+        /* TARJETA CON DEGRADADO: BLANCO ARRIBA -> NEGRO ABAJO */
+        .card-perfume { 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            border-radius: 15px; 
+            transition: transform 0.3s, box-shadow 0.3s; 
+            /* Degradado extendido: Blanco hasta el 50% para que el texto se lea bien */
+            background: linear-gradient(180deg, #ffffff 0%, #ffffff 45%, #1a1a1a 65%, #0a0a0a 100%);
+            color: white;
+            overflow: hidden;
+        }
+        .card-perfume:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 12px 25px rgba(255, 215, 0, 0.15); 
+            border-color: rgba(255, 215, 0, 0.3);
+        }
         
-        .badge-brand { background-color: #f3f4f6; color: #374151; font-weight: 600; font-size: 0.75rem; padding: 0.35em 0.65em; border-radius: 6px; }
+        .badge-brand { background-color: #333; color: #FFD700; font-weight: 600; font-size: 0.75rem; padding: 0.35em 0.65em; border-radius: 6px; }
         
-        .price-box { background-color: #f8f9fa; border-radius: 10px; padding: 12px; border: 1px solid #e5e7eb; }
-        .price-detal { font-weight: 700; color: #059669; font-size: 1.1rem; }
-        .price-label { color: #6b7280; font-size: 0.75rem; display: block; }
+        .price-box { 
+            background-color: rgba(0, 0, 0, 0.6); 
+            border-radius: 10px; 
+            padding: 12px; 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+        }
+        .price-detal { font-weight: 700; color: #4ade80; font-size: 1.1rem; }
+        .price-label { color: #9ca3af; font-size: 0.75rem; display: block; }
         
-        .img-container { height: 140px; display: flex; align-items: center; justify-content: center; background-color: #fafafa; border-radius: 8px; overflow: hidden; margin-bottom: 10px; }
+        .img-container { 
+            height: 140px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            background-color: #ffffff; 
+            border-radius: 8px; 
+            overflow: hidden; 
+            margin-bottom: 10px; 
+        }
         .img-container img { max-height: 100%; max-width: 100%; object-fit: contain; }
         
-        .card-agotado { opacity: 0.7; filter: grayscale(80%); }
-        .badge-agotado { position: absolute; top: 20px; right: 20px; background-color: #dc3545; color: white; font-weight: bold; font-size: 0.8rem; padding: 0.4em 0.7em; border-radius: 6px; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .card-agotado { opacity: 0.5; filter: grayscale(100%); }
+        .badge-agotado { position: absolute; top: 20px; right: 20px; background-color: #dc3545; color: white; font-weight: bold; font-size: 0.8rem; padding: 0.4em 0.7em; border-radius: 6px; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
 
         .btn-whatsapp { background-color: #25D366; color: white; font-weight: 600; border: none; border-radius: 8px; transition: 0.2s; }
-        .btn-whatsapp:hover { background-color: #1ebe57; color: white; transform: scale(1.02); }
-        .btn-agotado { background-color: #6c757d; color: white; font-weight: 600; border: none; cursor: not-allowed; border-radius: 8px; }
+        .btn-whatsapp:hover { background-color: #1ebe57; color: white; transform: scale(1.02); box-shadow: 0 0 15px rgba(37, 211, 102, 0.4); }
+        .btn-agotado { background-color: #333; color: #888; font-weight: 600; border: none; cursor: not-allowed; border-radius: 8px; }
         
+        /* NOMBRE DEL PRODUCTO EN NEGRO SÓLIDO */
         .card-title { 
-            color: #111827 !important; 
+            color: #000000 !important; 
             font-weight: 700;
             font-size: 0.95rem;
             margin-bottom: 4px;
         }
+
+        /* DESCRIPCIÓN CON DEGRADADO: NEGRO ARRIBA -> BLANCO ABAJO */
         .descripcion-texto { 
             font-size: 0.75rem; 
-            color: #4b5563 !important; 
-            font-weight: 400; 
+            font-weight: 500; 
             line-height: 1.4; 
             margin-bottom: 10px; 
+            
+            /* El degradado de color para el texto */
+            background: linear-gradient(180deg, #000000 0%, #000000 30%, #ffffff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
         }
     </style>
 </head>
@@ -199,8 +236,8 @@ HTML_TEMPLATE = """
 
     <div class="header-bg shadow-sm mb-4">
         <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Mi Logo" class="logo-header">
-        <h1 class="fw-bold m-0" style="letter-spacing: 1px;">✨ Catálogo de Perfumes</h1>
-        <p class="text-light opacity-75 mt-2 small" style="font-weight: 300;">Detal, Mayor (6+ unds) y Gran Mayor (15+ unds)</p>
+        <h1 class="fw-bold m-0" style="letter-spacing: 1px; color: white;">✨ Catálogo de Perfumes</h1>
+        <p class="text-light opacity-75 mt-2 small" style="font-weight: 300; color: #FFD700 !important;">Detal, Mayor (6+ unds) y Gran Mayor (15+ unds)</p>
         
         <a href="https://www.tiktok.com/@aroma2s" target="_blank" class="tiktok-btn">
             <i class="fab fa-tiktok"></i> Síguenos en TikTok: @aroma2s
@@ -235,17 +272,18 @@ HTML_TEMPLATE = """
                             <span class="badge badge-brand text-uppercase">{{ item.marca }}</span>
                             
                             {% if item.genero == 'Mujer' %}
-                                <span class="badge bg-danger-subtle text-danger" style="font-size:0.7rem;">Mujer</span>
+                                <span class="badge bg-danger text-white" style="font-size:0.7rem;">Mujer</span>
                             {% elif item.genero == 'Hombre' %}
-                                <span class="badge bg-primary-subtle text-primary" style="font-size:0.7rem;">Hombre</span>
+                                <span class="badge bg-primary text-white" style="font-size:0.7rem;">Hombre</span>
                             {% else %}
-                                <span class="badge bg-warning-subtle text-warning-emphasis" style="font-size:0.7rem;">Unisex</span>
+                                <span class="badge bg-warning text-dark" style="font-size:0.7rem;">Unisex</span>
                             {% endif %}
                             
                         </div>
                         <div class="img-container">
                             <img src="{{ item.imagen }}" onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\'text-muted small\'>📷 Sin imagen</span>';" alt="{{ item.producto }}">
                         </div>
+                        
                         <h6 class="card-title fw-bold">{{ item.producto }}</h6>
                         
                         {% if item.descripcion %}
@@ -255,17 +293,17 @@ HTML_TEMPLATE = """
                     </div>
                     
                     <div class="price-box mt-auto">
-                        <div class="d-flex justify-content-between align-items-center mb-1 pb-1 border-bottom">
+                        <div class="d-flex justify-content-between align-items-center mb-1 pb-1 border-bottom border-secondary">
                             <span class="price-label">Detal:</span>
                             <span class="price-detal">${{ "%.2f"|format(item.detal) }}</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <span class="price-label">Mayor (6+):</span>
-                            <span class="fw-bold text-dark">${{ "%.2f"|format(item.mayor) }}</span>
+                            <span class="fw-bold text-white">${{ "%.2f"|format(item.mayor) }}</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <span class="price-label">Gran Mayor (15+):</span>
-                            <span class="fw-bold text-primary">${{ "%.2f"|format(item.gran_mayor) }}</span>
+                            <span class="fw-bold" style="color: #60a5fa;">${{ "%.2f"|format(item.gran_mayor) }}</span>
                         </div>
                         
                         {% if item.stock > 0 %}
@@ -299,6 +337,7 @@ HTML_TEMPLATE = """
 </body>
 </html>
 """
+
 @app.route('/')
 def home():
     catalogo, error_msg = cargar_catalogo()
