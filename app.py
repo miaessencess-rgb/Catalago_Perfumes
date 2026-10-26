@@ -162,14 +162,12 @@ HTML_TEMPLATE = """
         .search-pill::placeholder { color: #888; }
         .search-pill:focus { background-color: #222; color: white; box-shadow: 0 4px 20px rgba(255, 215, 0, 0.2); border-color: #FFD700; outline: none; }
 
-        /* TARJETA CON DEGRADADO SUAVE (BLANCO ARRIBA, NEGRO ABAJO) */
+        /* TARJETA CON DEGRADADO SUAVE */
         .card-perfume { 
             border: 1px solid rgba(255, 255, 255, 0.15); 
             border-radius: 15px; 
             transition: transform 0.3s, box-shadow 0.3s; 
-            
             background: linear-gradient(180deg, #ffffff 0%, #ffffff 40%, #1a1a1a 60%, #0a0a0a 100%);
-            
             color: white;
             overflow: hidden;
         }
@@ -274,12 +272,13 @@ HTML_TEMPLATE = """
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="badge badge-brand text-uppercase">{{ item.marca }}</span>
                             
+                            <!-- ETIQUETAS DE GÉNERO RESTAURADAS A SU ESTILO SUAVE -->
                             {% if item.genero == 'Mujer' %}
-                                <span class="badge bg-danger text-white" style="font-size:0.7rem;">Mujer</span>
+                                <span class="badge bg-danger-subtle text-danger" style="font-size:0.7rem;">Mujer</span>
                             {% elif item.genero == 'Hombre' %}
-                                <span class="badge bg-primary text-white" style="font-size:0.7rem;">Hombre</span>
+                                <span class="badge bg-primary-subtle text-primary" style="font-size:0.7rem;">Hombre</span>
                             {% else %}
-                                <span class="badge bg-warning text-dark" style="font-size:0.7rem;">Unisex</span>
+                                <span class="badge bg-warning-subtle text-warning-emphasis" style="font-size:0.7rem;">Unisex</span>
                             {% endif %}
                             
                         </div>
