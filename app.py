@@ -205,23 +205,31 @@ HTML_TEMPLATE = """
         .btn-whatsapp:hover { background-color: #1ebe57; color: white; transform: scale(1.02); box-shadow: 0 0 15px rgba(37, 211, 102, 0.4); }
         .btn-agotado { background-color: #333; color: #888; font-weight: 600; border: none; cursor: not-allowed; border-radius: 8px; }
         
-        /* NOMBRE DEL PERFUME EN DORADO */
+        /* NOMBRE DEL PERFUME: DEGRADADO DE NEGRO A BLANCO */
         .card-title { 
-            color: #FFD700 !important; 
             font-weight: 700;
             font-size: 0.95rem;
             margin-bottom: 4px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.8); /* Sombra sutil para resaltar */
+            /* Degradado de Negro arriba a Blanco abajo */
+            background: linear-gradient(180deg, #000000 0%, #000000 20%, #ffffff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
         }
 
-        /* DESCRIPCIÓN EN DORADO SUAVE */
+        /* DESCRIPCIÓN: DEGRADADO DE NEGRO A BLANCO MÁS SUAVE */
         .descripcion-texto { 
             font-size: 0.75rem; 
-            color: #FDE047; /* Dorado más claro para que no compita con el título */
-            font-weight: 400; 
+            font-weight: 500; 
             line-height: 1.4; 
             margin-bottom: 10px; 
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            /* Degradado de Gris oscuro a Blanco */
+            background: linear-gradient(180deg, #111111 0%, #111111 10%, #ffffff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
         }
     </style>
 </head>
@@ -277,7 +285,6 @@ HTML_TEMPLATE = """
                             <img src="{{ item.imagen }}" onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\'text-muted small\'>📷 Sin imagen</span>';" alt="{{ item.producto }}">
                         </div>
                         
-                        <!-- NOMBRE Y DESCRIPCIÓN EN DORADO -->
                         <h6 class="card-title fw-bold">{{ item.producto }}</h6>
                         
                         {% if item.descripcion %}
