@@ -161,13 +161,13 @@ HTML_TEMPLATE = """
         .search-pill::placeholder { color: #888; }
         .search-pill:focus { background-color: #222; color: white; box-shadow: 0 4px 20px rgba(255, 215, 0, 0.2); border-color: #FFD700; outline: none; }
 
+        /* TARJETA CON DEGRADADO Y FONDO SEMITRANSPARENTE */
         .card-perfume { 
             border: 1px solid rgba(255, 255, 255, 0.1); 
             border-radius: 15px; 
             transition: transform 0.3s, box-shadow 0.3s; 
-            /* DEGRADADO CORREGIDO: Blanco solo en la foto, oscuro desde la mitad */
-            background: linear-gradient(180deg, #ffffff 0%, #ffffff 40%, #1a1a1a 55%, #0a0a0a 100%);
-            backdrop-filter: blur(8px);
+            background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 30%, rgba(26, 26, 26, 0.85) 60%, rgba(10, 10, 10, 0.95) 100%);
+            backdrop-filter: blur(8px); 
             color: white;
             overflow: hidden;
         }
@@ -180,7 +180,7 @@ HTML_TEMPLATE = """
         .badge-brand { background-color: #f3f4f6; color: #374151; font-weight: 600; font-size: 0.75rem; padding: 0.35em 0.65em; border-radius: 6px; }
         
         .price-box { 
-            background-color: rgba(0, 0, 0, 0.5); 
+            background-color: rgba(0, 0, 0, 0.4); 
             border-radius: 10px; 
             padding: 12px; 
             border: 1px solid rgba(255, 255, 255, 0.1); 
@@ -207,11 +207,14 @@ HTML_TEMPLATE = """
         .btn-whatsapp:hover { background-color: #1ebe57; color: white; transform: scale(1.02); box-shadow: 0 0 15px rgba(37, 211, 102, 0.4); }
         .btn-agotado { background-color: #333; color: #888; font-weight: 600; border: none; cursor: not-allowed; border-radius: 8px; }
         
-        /* TEXTO BLANCO Y GRIS PARA LEERSE EN EL FONDO OSCURO */
-        .card-title { color: #ffffff !important; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); } 
+        /* LETRAS DORADAS PARA EL NOMBRE Y LA DESCRIPCIÓN */
+        .card-title { 
+            color: #FFD700 !important; /* Dorado brillante */
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8); 
+        }
         .descripcion-texto { 
             font-size: 0.75rem; 
-            color: #d1d5db; 
+            color: #FDE047; /* Dorado más claro */
             font-weight: 300; 
             line-height: 1.4; 
             margin-bottom: 10px; 
