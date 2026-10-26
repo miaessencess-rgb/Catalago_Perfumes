@@ -205,25 +205,19 @@ HTML_TEMPLATE = """
         .btn-whatsapp:hover { background-color: #1ebe57; color: white; transform: scale(1.02); box-shadow: 0 0 15px rgba(37, 211, 102, 0.4); }
         .btn-agotado { background-color: #333; color: #888; font-weight: 600; border: none; cursor: not-allowed; border-radius: 8px; }
         
-        /* PRUEBA EXTREMA: NOMBRE EN ROJO CON FONDO AMARILLO */
+        /* NOMBRE DEL PRODUCTO EN NEGRO SÓLIDO */
         .card-title { 
-            color: #ff0000 !important; /* Rojo puro */
-            background-color: #ffff00; /* Fondo amarillo */
-            font-weight: 900;
-            padding: 5px;
-            border-radius: 5px;
+            color: #000000 !important; 
+            font-weight: 700;
             font-size: 0.95rem;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
 
-        /* PRUEBA EXTREMA: DESCRIPCIÓN EN AZUL CON FONDO CELESTE */
+        /* DESCRIPCIÓN EN NEGRO SÓLIDO */
         .descripcion-texto { 
             font-size: 0.75rem; 
-            color: #0000ff !important; /* Azul puro */
-            background-color: #87ceeb; /* Fondo celeste */
-            font-weight: 900; 
-            padding: 5px;
-            border-radius: 5px;
+            color: #000000 !important; 
+            font-weight: 500; 
             line-height: 1.4; 
             margin-bottom: 10px; 
         }
