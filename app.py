@@ -6,9 +6,15 @@ import io
 
 app = Flask(__name__)
 
-# ⚠️ PEGA AQUÍ TU ENLACE CSV
-URL_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRAPuJtY8lL5Ikn-aOZpSiHyUz9slXX7a2AYtBCdDXBMeOfWQbuawPFrYMZbzQJ3GsYuXFaHDs3FiwA/pub?gid=1300626180&single=true&output=csv"
+# ============================================================
+# ENLACES CSV/TSV (Google Sheets publicados)
+# ============================================================
+URL_GENERAL    = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRAPuJtY8lL5Ikn-aOZpSiHyUz9slXX7a2AYtBCdDXBMeOfWQbuawPFrYMZbzQJ3GsYuXFaHDs3FiwA/pub?gid=1300626180&single=true&output=csv"
+URL_ORIGINALES = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRhnTHAAiW4abm51bRJu4HnrlLijwB0-gfgpRN5xKnMI1yJaHSGAcgkQM3js0P8TYLPHOusc9A1DQsP/pub?gid=1978451106&single=true&output=tsv"
 
+# ============================================================
+# UTILIDADES
+# ============================================================
 def limpiar_precio(val):
     try:
         if pd.isna(val) or val == '': return 0.0
@@ -24,35 +30,37 @@ def limpiar_stock(val):
     except:
         return 1
 
-def cargar_catalogo():
+def cargar_catalogo(url, es_originales=False):
     catalogo = []
     error_msg = ""
-    
+
     try:
-        req = urllib.request.Request(URL_CSV, headers={'User-Agent': 'Mozilla/5.0'})
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
         with urllib.request.urlopen(req) as response:
             data = response.read().decode('utf-8')
-        
-        df = pd.read_csv(io.StringIO(data))
+
+        # Detectar separador automáticamente (csv = coma, tsv = tabulación)
+        sep = '\t' if 'output=tsv' in url else ','
+        df = pd.read_csv(io.StringIO(data), sep=sep)
         df.columns = df.columns.str.strip()
-        
+
         ruta_carpeta = os.path.join(app.root_path, 'static', 'fotos')
-        
+
         for _, row in df.iterrows():
             nombre = str(row.get('Nombre', '')).strip()
             marca = str(row.get('marca', '')).strip()
             descripcion_original = str(row.get('descripcion', '')).strip()
-            
+
             if descripcion_original == 'nan' or not descripcion_original:
                 descripcion_original = ""
-            
+
             if not nombre or nombre == 'nan':
                 continue
 
-            # --- LÓGICA DE LA ETIQUETA SECRETA ---
+            # --- LÓGICA DE LA ETIQUETA SECRETA (GÉNERO) ---
             genero = 'Unisex'
             descripcion_limpia = descripcion_original
-            
+
             if descripcion_original.startswith('[H]'):
                 genero = 'Hombre'
                 descripcion_limpia = descripcion_original[3:].strip()
@@ -73,17 +81,17 @@ def cargar_catalogo():
             mayor = limpiar_precio(row.get('precio_mayor', 0))
             gran_mayor = limpiar_precio(row.get('precio_gran_mayor', 0))
             stock = limpiar_stock(row.get('stock', 1))
-            
+
             slug = nombre.lower().replace(' ', '-').replace("'", "").replace('"', '').replace('&', 'and')
-            imagen = f"/static/fotos/{slug}.jpg" 
-            
+            imagen = f"/static/fotos/{slug}.jpg"
+
             if os.path.exists(ruta_carpeta):
                 for archivo in os.listdir(ruta_carpeta):
                     nombre_archivo, extension = os.path.splitext(archivo)
                     if nombre_archivo.lower() == slug.lower():
                         imagen = f"/static/fotos/{archivo}"
                         break
-                
+
             catalogo.append({
                 "marca": marca,
                 "producto": nombre,
@@ -93,13 +101,18 @@ def cargar_catalogo():
                 "mayor": mayor,
                 "gran_mayor": gran_mayor,
                 "imagen": imagen,
-                "stock": stock
+                "stock": stock,
+                "es_original": es_originales
             })
     except Exception as e:
         error_msg = str(e)
-        
+
     return catalogo, error_msg
 
+
+# ============================================================
+# TEMPLATE HTML
+# ============================================================
 HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="es">
@@ -110,26 +123,25 @@ HTML_TEMPLATE = """
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-    
+
     <style>
-        /* FONDO GENERAL NEGRO SÓLIDO */
         body { background-color: #0a0a0a; font-family: 'Poppins', sans-serif; margin: 0; padding: 0; }
-        
-        .header-bg { 
+
+        .header-bg {
             background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url("{{ url_for('static', filename='fotos/banner.jpg') }}");
             background-size: cover;
             background-position: center;
-            color: white; 
-            text-align: center; 
+            color: white;
+            text-align: center;
             border-bottom: 4px solid #FFD700;
-            padding: 3rem 1rem; 
+            padding: 3rem 1rem;
         }
 
         .logo-header {
-            width: 120px; height: 120px; object-fit: cover; 
-            margin-bottom: 15px; border-radius: 50%; 
+            width: 120px; height: 120px; object-fit: cover;
+            margin-bottom: 15px; border-radius: 50%;
             box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
-            border: 4px solid #FFD700; background-color: #000; 
+            border: 4px solid #FFD700; background-color: #000;
         }
 
         .tiktok-btn {
@@ -150,6 +162,37 @@ HTML_TEMPLATE = """
         }
         .tiktok-btn:hover { background-color: #FFD700; color: #000; transform: translateY(-2px); }
 
+        /* ---------- PESTAÑAS ---------- */
+        .tabs-nav {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 0 auto 1.5rem auto;
+            flex-wrap: wrap;
+        }
+        .tab-link {
+            padding: 12px 30px;
+            border-radius: 40px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+            border: 2px solid #FFD700;
+            color: #FFD700;
+            background: transparent;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tab-link:hover { background: rgba(255, 215, 0, 0.15); color: #FFD700; }
+        .tab-link.active {
+            background: #FFD700;
+            color: #000;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+        }
+
+        /* ---------- BUSCADOR ---------- */
         .search-pill {
             border-radius: 50px !important;
             border: 1px solid #333;
@@ -162,74 +205,89 @@ HTML_TEMPLATE = """
         .search-pill::placeholder { color: #888; }
         .search-pill:focus { background-color: #222; color: white; box-shadow: 0 4px 20px rgba(255, 215, 0, 0.2); border-color: #FFD700; outline: none; }
 
-        /* TARJETA CON DEGRADADO SUAVE */
-        .card-perfume { 
-            border: 1px solid rgba(255, 255, 255, 0.15); 
-            border-radius: 15px; 
-            transition: transform 0.3s, box-shadow 0.3s; 
+        /* ---------- TARJETAS ---------- */
+        .card-perfume {
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            transition: transform 0.3s, box-shadow 0.3s;
             background: linear-gradient(180deg, #ffffff 0%, #ffffff 40%, #1a1a1a 60%, #0a0a0a 100%);
             color: white;
             overflow: hidden;
+            position: relative;
         }
-        .card-perfume:hover { 
-            transform: translateY(-5px); 
-            box-shadow: 0 12px 25px rgba(255, 215, 0, 0.2); 
+        .card-perfume:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(255, 215, 0, 0.2);
             border-color: rgba(255, 215, 0, 0.4);
         }
-        
-        /* ETIQUETA DE LA MARCA: BLANCA CON LETRA GRIS */
-        .badge-brand { 
-            background-color: #f3f4f6; 
-            color: #374151; 
-            font-weight: 600; 
-            font-size: 0.75rem; 
-            padding: 0.35em 0.65em; 
-            border-radius: 6px; 
+
+        .badge-brand {
+            background-color: #f3f4f6;
+            color: #374151;
+            font-weight: 600;
+            font-size: 0.75rem;
+            padding: 0.35em 0.65em;
+            border-radius: 6px;
         }
-        
-        .price-box { 
-            background-color: rgba(0, 0, 0, 0.5); 
-            border-radius: 10px; 
-            padding: 12px; 
-            border: 1px solid rgba(255, 255, 255, 0.1); 
+
+        /* Badge ORIGINAL dorado */
+        .badge-original {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000;
+            font-weight: 800;
+            font-size: 0.65rem;
+            padding: 0.35em 0.7em;
+            border-radius: 6px;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.5);
+            z-index: 10;
+            text-transform: uppercase;
+        }
+
+        .price-box {
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         .price-detal { font-weight: 700; color: #4ade80; font-size: 1.1rem; }
         .price-label { color: #9ca3af; font-size: 0.75rem; display: block; }
-        
-        .img-container { 
-            height: 140px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            background-color: #ffffff; 
-            border-radius: 8px; 
-            overflow: hidden; 
-            margin-bottom: 10px; 
+
+        .img-container {
+            height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 10px;
         }
         .img-container img { max-height: 100%; max-width: 100%; object-fit: contain; }
-        
+
         .card-agotado { opacity: 0.5; filter: grayscale(100%); }
-        .badge-agotado { position: absolute; top: 20px; right: 20px; background-color: #dc3545; color: white; font-weight: bold; font-size: 0.8rem; padding: 0.4em 0.7em; border-radius: 6px; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .badge-agotado { position: absolute; top: 20px; left: 20px; background-color: #dc3545; color: white; font-weight: bold; font-size: 0.8rem; padding: 0.4em 0.7em; border-radius: 6px; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
 
         .btn-whatsapp { background-color: #25D366; color: white; font-weight: 600; border: none; border-radius: 8px; transition: 0.2s; }
         .btn-whatsapp:hover { background-color: #1ebe57; color: white; transform: scale(1.02); box-shadow: 0 0 15px rgba(37, 211, 102, 0.4); }
         .btn-agotado { background-color: rgba(51, 51, 51, 0.8); color: #888; font-weight: 600; border: none; cursor: not-allowed; border-radius: 8px; }
-        
-        /* NOMBRE DEL PRODUCTO EN NEGRO SÓLIDO */
-        .card-title { 
-            color: #000000 !important; 
+
+        .card-title {
+            color: #000000 !important;
             font-weight: 700;
             font-size: 0.95rem;
             margin-bottom: 4px;
         }
 
-        /* DESCRIPCIÓN EN NEGRO SÓLIDO */
-        .descripcion-texto { 
-            font-size: 0.75rem; 
-            color: #000000 !important; 
-            font-weight: 500; 
-            line-height: 1.4; 
-            margin-bottom: 10px; 
+        .descripcion-texto {
+            font-size: 0.75rem;
+            color: #000000 !important;
+            font-weight: 500;
+            line-height: 1.4;
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -239,13 +297,24 @@ HTML_TEMPLATE = """
         <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Mi Logo" class="logo-header">
         <h1 class="fw-bold m-0" style="letter-spacing: 1px; color: white;">✨ Catálogo de Perfumes</h1>
         <p class="text-light opacity-75 mt-2 small" style="font-weight: 300; color: #FFD700 !important;">Detal, Mayor (6+ unds) y Gran Mayor (15+ unds)</p>
-        
+
         <a href="https://www.tiktok.com/@aroma2s" target="_blank" class="tiktok-btn">
             <i class="fab fa-tiktok"></i> Síguenos en TikTok: @aroma2s
         </a>
     </div>
 
     <div class="container pb-5">
+
+        <!-- PESTAÑAS DE NAVEGACIÓN -->
+        <div class="tabs-nav">
+            <a href="{{ url_for('home') }}" class="tab-link {% if seccion == 'general' %}active{% endif %}">
+                <i class="fas fa-spray-can-sparkles"></i> General
+            </a>
+            <a href="{{ url_for('originales') }}" class="tab-link {% if seccion == 'originales' %}active{% endif %}">
+                <i class="fas fa-crown"></i> Originales
+            </a>
+        </div>
+
         {% if error_msg %}
         <div class="alert alert-danger text-center">
             <strong>Error al cargar los productos:</strong> {{ error_msg }}
@@ -261,18 +330,21 @@ HTML_TEMPLATE = """
         <div class="row g-3" id="productList">
             {% for item in catalogo %}
             <div class="col-6 col-md-4 col-lg-3 product-item" data-search="{{ item.marca.lower() }} {{ item.producto.lower() }} {{ item.descripcion.lower() }}">
-                
+
                 <div class="card card-perfume h-100 p-3 shadow-sm d-flex flex-column justify-content-between position-relative {% if item.stock <= 0 %}card-agotado{% endif %}">
-                    
+
                     {% if item.stock <= 0 %}
                         <div class="badge-agotado">AGOTADO</div>
+                    {% endif %}
+
+                    {% if item.es_original %}
+                        <div class="badge-original">★ Original</div>
                     {% endif %}
 
                     <div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="badge badge-brand text-uppercase">{{ item.marca }}</span>
-                            
-                            <!-- ETIQUETAS DE GÉNERO RESTAURADAS A SU ESTILO SUAVE -->
+
                             {% if item.genero == 'Mujer' %}
                                 <span class="badge bg-danger-subtle text-danger" style="font-size:0.7rem;">Mujer</span>
                             {% elif item.genero == 'Hombre' %}
@@ -280,20 +352,20 @@ HTML_TEMPLATE = """
                             {% else %}
                                 <span class="badge bg-warning-subtle text-warning-emphasis" style="font-size:0.7rem;">Unisex</span>
                             {% endif %}
-                            
+
                         </div>
                         <div class="img-container">
-                            <img src="{{ item.imagen }}" onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\'text-muted small\'>📷 Sin imagen</span>';" alt="{{ item.producto }}">
+                            <img src="{{ item.imagen }}" onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\\'text-muted small\\'>📷 Sin imagen</span>';" alt="{{ item.producto }}">
                         </div>
-                        
+
                         <h6 class="card-title fw-bold">{{ item.producto }}</h6>
-                        
+
                         {% if item.descripcion %}
                             <p class="descripcion-texto">{{ item.descripcion }}</p>
                         {% endif %}
-                        
+
                     </div>
-                    
+
                     <div class="price-box mt-auto">
                         <div class="d-flex justify-content-between align-items-center mb-1 pb-1 border-bottom border-secondary">
                             <span class="price-label">Detal:</span>
@@ -307,7 +379,7 @@ HTML_TEMPLATE = """
                             <span class="price-label">Gran Mayor (15+):</span>
                             <span class="fw-bold" style="color: #60a5fa;">${{ "%.2f"|format(item.gran_mayor) }}</span>
                         </div>
-                        
+
                         {% if item.stock > 0 %}
                             <a href="https://wa.me/584228490047?text=Hola,%20estoy%20interesado%20en%20el%20perfume:%20{{ item.producto | urlencode }}%20-%20Marca:%20{{ item.marca | urlencode }}.%20Precio%20Detal:%20${{ '%.2f'|format(item.detal) }}" target="_blank" class="btn btn-whatsapp btn-sm w-100">
                                💬 Pedir por WhatsApp
@@ -317,12 +389,19 @@ HTML_TEMPLATE = """
                                ❌ Agotado
                             </button>
                         {% endif %}
-                        
+
                     </div>
                 </div>
             </div>
             {% endfor %}
         </div>
+
+        {% if not catalogo and not error_msg %}
+        <div class="text-center text-muted py-5">
+            <p>No hay productos disponibles en esta sección.</p>
+        </div>
+        {% endif %}
+
     </div>
 
     <script>
@@ -331,7 +410,7 @@ HTML_TEMPLATE = """
         let items = document.getElementsByClassName('product-item');
         for (let i = 0; i < items.length; i++) {
             let searchData = items[i].getAttribute('data-search');
-            if (searchData.includes(input)) { items[i].style.display = ""; } 
+            if (searchData.includes(input)) { items[i].style.display = ""; }
             else { items[i].style.display = "none"; }
         }
     }
@@ -340,10 +419,28 @@ HTML_TEMPLATE = """
 </html>
 """
 
+# ============================================================
+# RUTAS
+# ============================================================
 @app.route('/')
 def home():
-    catalogo, error_msg = cargar_catalogo()
-    return render_template_string(HTML_TEMPLATE, catalogo=catalogo, error_msg=error_msg)
+    catalogo, error_msg = cargar_catalogo(URL_GENERAL, es_originales=False)
+    return render_template_string(
+        HTML_TEMPLATE,
+        catalogo=catalogo,
+        error_msg=error_msg,
+        seccion='general'
+    )
+
+@app.route('/originales')
+def originales():
+    catalogo, error_msg = cargar_catalogo(URL_ORIGINALES, es_originales=True)
+    return render_template_string(
+        HTML_TEMPLATE,
+        catalogo=catalogo,
+        error_msg=error_msg,
+        seccion='originales'
+    )
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
