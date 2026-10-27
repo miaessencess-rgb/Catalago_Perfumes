@@ -1,4 +1,5 @@
 import os
+import re
 import pandas as pd
 from flask import Flask, render_template_string, url_for
 import urllib.request
@@ -30,6 +31,16 @@ def limpiar_stock(val):
     except:
         return 1
 
+def generar_slug_originales(nombre):
+    """Limpia el nombre para que sea un archivo válido en GitHub (sin puntos, barras, etc.)"""
+    slug = nombre.lower()
+    slug = slug.replace('&', 'and')
+    slug = slug.replace("'", "").replace('"', '')
+    slug = re.sub(r'[^a-z0-9]+', '-', slug)
+    slug = slug.strip('-')
+    slug = re.sub(r'-+', '-', slug)
+    return slug
+
 def cargar_catalogo(url, es_originales=False):
     catalogo = []
     error_msg = ""
@@ -44,7 +55,9 @@ def cargar_catalogo(url, es_originales=False):
         df = pd.read_csv(io.StringIO(data), sep=sep)
         df.columns = df.columns.str.strip()
 
-        ruta_carpeta = os.path.join(app.root_path, 'static', 'fotos')
+        # Definir qué carpeta usar según la pestaña
+        nombre_carpeta = 'fotos_originales' if es_originales else 'fotos'
+        ruta_carpeta = os.path.join(app.root_path, 'static', nombre_carpeta)
 
         for _, row in df.iterrows():
             nombre = str(row.get('Nombre', '')).strip()
@@ -82,14 +95,21 @@ def cargar_catalogo(url, es_originales=False):
             gran_mayor = limpiar_precio(row.get('precio_gran_mayor', 0))
             stock = limpiar_stock(row.get('stock', 1))
 
-            slug = nombre.lower().replace(' ', '-').replace("'", "").replace('"', '').replace('&', 'and')
-            imagen = f"/static/fotos/{slug}.jpg"
+            # --- LÓGICA DE BÚSQUEDA DE IMAGEN ---
+            if es_originales:
+                # Para originales: usar la nueva función de limpieza
+                slug = generar_slug_originales(nombre)
+            else:
+                # Para general: mantener el slug viejo para no romper fotos
+                slug = nombre.lower().replace(' ', '-').replace("'", "").replace('"', '').replace('&', 'and')
+
+            imagen = f"/static/{nombre_carpeta}/{slug}.jpg"
 
             if os.path.exists(ruta_carpeta):
                 for archivo in os.listdir(ruta_carpeta):
                     nombre_archivo, extension = os.path.splitext(archivo)
                     if nombre_archivo.lower() == slug.lower():
-                        imagen = f"/static/fotos/{archivo}"
+                        imagen = f"/static/{nombre_carpeta}/{archivo}"
                         break
 
             catalogo.append({
@@ -111,7 +131,7 @@ def cargar_catalogo(url, es_originales=False):
 
 
 # ============================================================
-# TEMPLATE HTML
+# TEMPLATE HTML (Idéntico al que ya tenías, con diseño intacto)
 # ============================================================
 HTML_TEMPLATE = """
 <!DOCTYPE html>
