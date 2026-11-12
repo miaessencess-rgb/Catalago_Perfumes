@@ -32,7 +32,6 @@ def limpiar_stock(val):
         return 1
 
 def generar_slug_originales(nombre):
-    """Limpia el nombre para que sea un archivo válido en GitHub (sin puntos, barras, etc.)"""
     slug = nombre.lower()
     slug = slug.replace('&', 'and')
     slug = slug.replace("'", "").replace('"', '')
@@ -55,9 +54,6 @@ def cargar_catalogo(url, es_originales=False):
         df.columns = df.columns.str.strip()
 
         nombre_carpeta = 'fotos_originales' if es_originales else 'fotos'
-        
-        # En Vercel, la carpeta static está en la raíz del proyecto.
-        ruta_carpeta = os.path.join(os.getcwd(), 'static', nombre_carpeta)
 
         for _, row in df.iterrows():
             nombre = str(row.get('Nombre', '')).strip()
@@ -99,15 +95,8 @@ def cargar_catalogo(url, es_originales=False):
             else:
                 slug = nombre.lower().replace(' ', '-').replace("'", "").replace('"', '').replace('&', 'and')
 
+            # En Vercel no podemos usar os.listdir. Asumimos .jpg y el HTML intentará otras extensiones.
             imagen = f"/static/{nombre_carpeta}/{slug}.jpg"
-
-            # Buscar si la imagen existe físicamente
-            if os.path.exists(ruta_carpeta):
-                for archivo in os.listdir(ruta_carpeta):
-                    nombre_archivo, extension = os.path.splitext(archivo)
-                    if nombre_archivo.lower() == slug.lower():
-                        imagen = f"/static/{nombre_carpeta}/{archivo}"
-                        break
 
             catalogo.append({
                 "marca": marca,
@@ -128,7 +117,7 @@ def cargar_catalogo(url, es_originales=False):
 
 
 # ============================================================
-# TEMPLATE HTML
+# TEMPLATE HTML (Con magia en JS para buscar formatos)
 # ============================================================
 HTML_TEMPLATE = """
 <!DOCTYPE html>
@@ -143,162 +132,40 @@ HTML_TEMPLATE = """
 
     <style>
         body { background-color: #0a0a0a; font-family: 'Poppins', sans-serif; margin: 0; padding: 0; }
-
-        .header-bg {
-            background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url("{{ url_for('static', filename='fotos/banner.jpg') }}");
-            background-size: cover;
-            background-position: center;
-            color: white;
-            text-align: center;
-            border-bottom: 4px solid #FFD700;
-            padding: 3rem 1rem;
-        }
-
-        .logo-header {
-            width: 120px; height: 120px; object-fit: cover;
-            margin-bottom: 15px; border-radius: 50%;
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
-            border: 4px solid #FFD700; background-color: #000;
-        }
-
-        .tiktok-btn {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: #fff;
-            text-decoration: none;
-            padding: 8px 24px;
-            border-radius: 30px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            border: 2px solid #FFD700;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-            transition: all 0.3s ease;
-            margin-top: 15px;
-        }
+        .header-bg { background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url("/static/banner.jpg"); background-size: cover; background-position: center; color: white; text-align: center; border-bottom: 4px solid #FFD700; padding: 3rem 1rem; }
+        .logo-header { width: 120px; height: 120px; object-fit: cover; margin-bottom: 15px; border-radius: 50%; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3); border: 4px solid #FFD700; background-color: #000; }
+        .tiktok-btn { background-color: rgba(255, 255, 255, 0.1); color: #fff; text-decoration: none; padding: 8px 24px; border-radius: 30px; font-weight: 600; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 8px; border: 2px solid #FFD700; box-shadow: 0 4px 10px rgba(0,0,0,0.4); transition: all 0.3s ease; margin-top: 15px; }
         .tiktok-btn:hover { background-color: #FFD700; color: #000; transform: translateY(-2px); }
-
-        .tabs-nav {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin: 0 auto 1.5rem auto;
-            flex-wrap: wrap;
-        }
-        .tab-link {
-            padding: 12px 30px;
-            border-radius: 40px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 1rem;
-            letter-spacing: 0.5px;
-            border: 2px solid #FFD700;
-            color: #FFD700;
-            background: transparent;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .tabs-nav { display: flex; justify-content: center; gap: 10px; margin: 0 auto 1.5rem auto; flex-wrap: wrap; }
+        .tab-link { padding: 12px 30px; border-radius: 40px; text-decoration: none; font-weight: 600; font-size: 1rem; letter-spacing: 0.5px; border: 2px solid #FFD700; color: #FFD700; background: transparent; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px; }
         .tab-link:hover { background: rgba(255, 215, 0, 0.15); color: #FFD700; }
-        .tab-link.active {
-            background: #FFD700;
-            color: #000;
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
-        }
-
-        .search-pill {
-            border-radius: 50px !important;
-            border: 1px solid #333;
-            background-color: #1a1a1a;
-            color: white;
-            padding: 15px 25px;
-            font-size: 1.1rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        }
+        .tab-link.active { background: #FFD700; color: #000; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4); }
+        .search-pill { border-radius: 50px !important; border: 1px solid #333; background-color: #1a1a1a; color: white; padding: 15px 25px; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         .search-pill::placeholder { color: #888; }
         .search-pill:focus { background-color: #222; color: white; box-shadow: 0 4px 20px rgba(255, 215, 0, 0.2); border-color: #FFD700; outline: none; }
-
-        .card-perfume {
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 15px;
-            transition: transform 0.3s, box-shadow 0.3s;
-            background: linear-gradient(180deg, #ffffff 0%, #ffffff 40%, #1a1a1a 60%, #0a0a0a 100%);
-            color: white;
-            overflow: hidden;
-            position: relative;
-        }
-        .card-perfume:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 25px rgba(255, 215, 0, 0.2);
-            border-color: rgba(255, 215, 0, 0.4);
-        }
-
-        .badge-brand {
-            background-color: #f3f4f6;
-            color: #374151;
-            font-weight: 600;
-            font-size: 0.75rem;
-            padding: 0.35em 0.65em;
-            border-radius: 6px;
-        }
-
-        .badge-original {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            color: #000;
-            font-weight: 800;
-            font-size: 0.65rem;
-            padding: 0.35em 0.7em;
-            border-radius: 6px;
-            letter-spacing: 1px;
-            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.5);
-            z-index: 10;
-            text-transform: uppercase;
-        }
-
-        .price-box {
-            background-color: rgba(0, 0, 0, 0.5);
-            border-radius: 10px;
-            padding: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
+        .card-perfume { border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 15px; transition: transform 0.3s, box-shadow 0.3s; background: linear-gradient(180deg, #ffffff 0%, #ffffff 40%, #1a1a1a 60%, #0a0a0a 100%); color: white; overflow: hidden; position: relative; }
+        .card-perfume:hover { transform: translateY(-5px); box-shadow: 0 12px 25px rgba(255, 215, 0, 0.2); border-color: rgba(255, 215, 0, 0.4); }
+        .badge-brand { background-color: #f3f4f6; color: #374151; font-weight: 600; font-size: 0.75rem; padding: 0.35em 0.65em; border-radius: 6px; }
+        .badge-original { position: absolute; top: 12px; right: 12px; background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; font-weight: 800; font-size: 0.65rem; padding: 0.35em 0.7em; border-radius: 6px; letter-spacing: 1px; box-shadow: 0 2px 8px rgba(255, 215, 0, 0.5); z-index: 10; text-transform: uppercase; }
+        .price-box { background-color: rgba(0, 0, 0, 0.5); border-radius: 10px; padding: 12px; border: 1px solid rgba(255, 255, 255, 0.1); }
         .price-detal { font-weight: 700; color: #4ade80; font-size: 1.1rem; }
         .price-label { color: #9ca3af; font-size: 0.75rem; display: block; }
-
-        .img-container {
-            height: 140px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #ffffff;
-            border-radius: 8px;
-            overflow: hidden;
-            margin-bottom: 10px;
-        }
+        .img-container { height: 140px; display: flex; align-items: center; justify-content: center; background-color: #ffffff; border-radius: 8px; overflow: hidden; margin-bottom: 10px; }
         .img-container img { max-height: 100%; max-width: 100%; object-fit: contain; }
-
         .card-agotado { opacity: 0.5; filter: grayscale(100%); }
         .badge-agotado { position: absolute; top: 20px; left: 20px; background-color: #dc3545; color: white; font-weight: bold; font-size: 0.8rem; padding: 0.4em 0.7em; border-radius: 6px; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-
         .btn-whatsapp { background-color: #25D366; color: white; font-weight: 600; border: none; border-radius: 8px; transition: 0.2s; }
         .btn-whatsapp:hover { background-color: #1ebe57; color: white; transform: scale(1.02); box-shadow: 0 0 15px rgba(37, 211, 102, 0.4); }
         .btn-agotado { background-color: rgba(51, 51, 51, 0.8); color: #888; font-weight: 600; border: none; cursor: not-allowed; border-radius: 8px; }
-
         .card-title { color: #000000 !important; font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; }
         .descripcion-texto { font-size: 0.75rem; color: #000000 !important; font-weight: 500; line-height: 1.4; margin-bottom: 10px; }
     </style>
 </head>
 <body>
-
     <div class="header-bg shadow-sm mb-4">
-        <img src="/static/logo.jpg" alt="Mi Logo" class="logo-header">
+        <img src="/static/logo.jpg" alt="Mi Logo" class="logo-header" onerror="this.style.display='none'">
         <h1 class="fw-bold m-0" style="letter-spacing: 1px; color: white;">✨ Catálogo de Perfumes</h1>
         <p class="text-light opacity-75 mt-2 small" style="font-weight: 300; color: #FFD700 !important;">Detal, Mayor (6+ unds) y Gran Mayor (15+ unds)</p>
-
         <a href="https://www.tiktok.com/@aroma2s" target="_blank" class="tiktok-btn">
             <i class="fab fa-tiktok"></i> Síguenos en TikTok: @aroma2s
         </a>
@@ -351,9 +218,19 @@ HTML_TEMPLATE = """
                                 <span class="badge bg-warning-subtle text-warning-emphasis" style="font-size:0.7rem;">Unisex</span>
                             {% endif %}
                         </div>
+                        
                         <div class="img-container">
-                            <img src="{{ item.imagen }}" onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\\'text-muted small\\'>📷 Sin imagen</span>';" alt="{{ item.producto }}">
+                            <!-- AQUÍ ESTÁ LA MAGIA: Busca .jpg, luego .jpeg, luego .png, luego .webp -->
+                            <img src="{{ item.imagen }}" 
+                                 onerror="
+                                    if (!this.dataset.tried) { this.dataset.tried='jpeg'; this.src = this.src.replace(/\\.jpg$/, '.jpeg'); }
+                                    else if (this.dataset.tried=='jpeg') { this.dataset.tried='png'; this.src = this.src.replace(/\\.jpeg$/, '.png'); }
+                                    else if (this.dataset.tried=='png') { this.dataset.tried='webp'; this.src = this.src.replace(/\\.png$/, '.webp'); }
+                                    else { this.onerror=null; this.parentElement.innerHTML='<span class=\\'text-muted small\\'>📷 Sin imagen</span>'; }
+                                 " 
+                                 alt="{{ item.producto }}">
                         </div>
+                        
                         <h6 class="card-title fw-bold">{{ item.producto }}</h6>
                         {% if item.descripcion %}
                             <p class="descripcion-texto">{{ item.descripcion }}</p>
@@ -433,5 +310,3 @@ def originales():
         error_msg=error_msg,
         seccion='originales'
     )
-
-# NOTA: Se eliminó el app.run() porque Vercel maneja el servidor automáticamente.
