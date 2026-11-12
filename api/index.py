@@ -95,7 +95,7 @@ def cargar_catalogo(url, es_originales=False):
             else:
                 slug = nombre.lower().replace(' ', '-').replace("'", "").replace('"', '').replace('&', 'and')
 
-            # En Vercel no podemos usar os.listdir. Asumimos .jpg y el HTML intentará otras extensiones.
+            # RUTA MANTENIDA PARA FLASK Y RENDER
             imagen = f"/static/{nombre_carpeta}/{slug}.jpg"
 
             catalogo.append({
@@ -117,7 +117,7 @@ def cargar_catalogo(url, es_originales=False):
 
 
 # ============================================================
-# TEMPLATE HTML (Con magia en JS para buscar formatos)
+# TEMPLATE HTML
 # ============================================================
 HTML_TEMPLATE = """
 <!DOCTYPE html>
@@ -220,7 +220,7 @@ HTML_TEMPLATE = """
                         </div>
                         
                         <div class="img-container">
-                            <!-- AQUÍ ESTÁ LA MAGIA: Busca .jpg, luego .jpeg, luego .png, luego .webp -->
+                            <!-- Busca .jpg, luego .jpeg, luego .png -->
                             <img src="{{ item.imagen }}" 
                                  onerror="
                                     if (!this.dataset.tried) { this.dataset.tried='jpeg'; this.src = this.src.replace(/\\.jpg$/, '.jpeg'); }
@@ -294,19 +294,9 @@ HTML_TEMPLATE = """
 @app.route('/')
 def home():
     catalogo, error_msg = cargar_catalogo(URL_GENERAL, es_originales=False)
-    return render_template_string(
-        HTML_TEMPLATE,
-        catalogo=catalogo,
-        error_msg=error_msg,
-        seccion='general'
-    )
+    return render_template_string(HTML_TEMPLATE, catalogo=catalogo, error_msg=error_msg, seccion='general')
 
 @app.route('/originales')
 def originales():
     catalogo, error_msg = cargar_catalogo(URL_ORIGINALES, es_originales=True)
-    return render_template_string(
-        HTML_TEMPLATE,
-        catalogo=catalogo,
-        error_msg=error_msg,
-        seccion='originales'
-    )
+    return render_template_string(HTML_TEMPLATE, catalogo=catalogo, error_msg=error_msg, seccion='originales')
