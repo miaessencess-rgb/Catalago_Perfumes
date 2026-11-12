@@ -5,7 +5,12 @@ from flask import Flask, render_template_string
 import urllib.request
 import io
 
-app = Flask(__name__)
+# ============================================================
+# CONFIGURACIÓN CLAVE PARA VERCEL Y RENDER
+# ============================================================
+# Esto le dice a Flask exactamente dónde está la carpeta static (en la raíz del proyecto)
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+app = Flask(__name__, static_folder=os.path.join(base_dir, 'static'), static_url_path='/static')
 
 # ============================================================
 # ENLACES CSV/TSV (Google Sheets publicados)
@@ -54,6 +59,7 @@ def cargar_catalogo(url, es_originales=False):
         df.columns = df.columns.str.strip()
 
         nombre_carpeta = 'fotos_originales' if es_originales else 'fotos'
+        ruta_carpeta = os.path.join(base_dir, 'static', nombre_carpeta)
 
         for _, row in df.iterrows():
             nombre = str(row.get('Nombre', '')).strip()
@@ -95,8 +101,18 @@ def cargar_catalogo(url, es_originales=False):
             else:
                 slug = nombre.lower().replace(' ', '-').replace("'", "").replace('"', '').replace('&', 'and')
 
-            # RUTA MANTENIDA PARA FLASK Y RENDER
             imagen = f"/static/{nombre_carpeta}/{slug}.jpg"
+
+            # Lógica original de búsqueda (funciona en Render y en Vercel)
+            try:
+                if os.path.exists(ruta_carpeta):
+                    for archivo in os.listdir(ruta_carpeta):
+                        nombre_archivo, extension = os.path.splitext(archivo)
+                        if nombre_archivo.lower() == slug.lower():
+                            imagen = f"/static/{nombre_carpeta}/{archivo}"
+                            break
+            except Exception:
+                pass # Si falla en Vercel, usará la ruta por defecto .jpg
 
             catalogo.append({
                 "marca": marca,
@@ -220,7 +236,7 @@ HTML_TEMPLATE = """
                         </div>
                         
                         <div class="img-container">
-                            <!-- Busca .jpg, luego .jpeg, luego .png -->
+                            <!-- Busca .jpg, luego .jpeg, luego .png, luego .webp -->
                             <img src="{{ item.imagen }}" 
                                  onerror="
                                     if (!this.dataset.tried) { this.dataset.tried='jpeg'; this.src = this.src.replace(/\\.jpg$/, '.jpeg'); }
