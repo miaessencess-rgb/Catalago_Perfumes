@@ -1,8 +1,7 @@
-
 import os
 import re
 import pandas as pd
-from flask import Flask, render_template_string, url_for
+from flask import Flask, render_template_string
 import urllib.request
 import io
 
@@ -51,14 +50,14 @@ def cargar_catalogo(url, es_originales=False):
         with urllib.request.urlopen(req) as response:
             data = response.read().decode('utf-8')
 
-        # Detectar separador automáticamente (csv = coma, tsv = tabulación)
         sep = '\t' if 'output=tsv' in url else ','
         df = pd.read_csv(io.StringIO(data), sep=sep)
         df.columns = df.columns.str.strip()
 
-        # Definir qué carpeta usar según la pestaña
         nombre_carpeta = 'fotos_originales' if es_originales else 'fotos'
-        ruta_carpeta = os.path.join(app.root_path, 'static', nombre_carpeta)
+        
+        # En Vercel, la carpeta static está en la raíz del proyecto.
+        ruta_carpeta = os.path.join(os.getcwd(), 'static', nombre_carpeta)
 
         for _, row in df.iterrows():
             nombre = str(row.get('Nombre', '')).strip()
@@ -71,7 +70,6 @@ def cargar_catalogo(url, es_originales=False):
             if not nombre or nombre == 'nan':
                 continue
 
-            # --- LÓGICA DE LA ETIQUETA SECRETA (GÉNERO) ---
             genero = 'Unisex'
             descripcion_limpia = descripcion_original
 
@@ -96,16 +94,14 @@ def cargar_catalogo(url, es_originales=False):
             gran_mayor = limpiar_precio(row.get('precio_gran_mayor', 0))
             stock = limpiar_stock(row.get('stock', 1))
 
-            # --- LÓGICA DE BÚSQUEDA DE IMAGEN ---
             if es_originales:
-                # Para originales: usar la nueva función de limpieza
                 slug = generar_slug_originales(nombre)
             else:
-                # Para general: mantener el slug viejo para no romper fotos
                 slug = nombre.lower().replace(' ', '-').replace("'", "").replace('"', '').replace('&', 'and')
 
             imagen = f"/static/{nombre_carpeta}/{slug}.jpg"
 
+            # Buscar si la imagen existe físicamente
             if os.path.exists(ruta_carpeta):
                 for archivo in os.listdir(ruta_carpeta):
                     nombre_archivo, extension = os.path.splitext(archivo)
@@ -132,7 +128,7 @@ def cargar_catalogo(url, es_originales=False):
 
 
 # ============================================================
-# TEMPLATE HTML (Idéntico al que ya tenías, con diseño intacto)
+# TEMPLATE HTML
 # ============================================================
 HTML_TEMPLATE = """
 <!DOCTYPE html>
@@ -183,7 +179,6 @@ HTML_TEMPLATE = """
         }
         .tiktok-btn:hover { background-color: #FFD700; color: #000; transform: translateY(-2px); }
 
-        /* ---------- PESTAÑAS ---------- */
         .tabs-nav {
             display: flex;
             justify-content: center;
@@ -213,7 +208,6 @@ HTML_TEMPLATE = """
             box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
         }
 
-        /* ---------- BUSCADOR ---------- */
         .search-pill {
             border-radius: 50px !important;
             border: 1px solid #333;
@@ -226,7 +220,6 @@ HTML_TEMPLATE = """
         .search-pill::placeholder { color: #888; }
         .search-pill:focus { background-color: #222; color: white; box-shadow: 0 4px 20px rgba(255, 215, 0, 0.2); border-color: #FFD700; outline: none; }
 
-        /* ---------- TARJETAS ---------- */
         .card-perfume {
             border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 15px;
@@ -251,7 +244,6 @@ HTML_TEMPLATE = """
             border-radius: 6px;
         }
 
-        /* Badge ORIGINAL dorado */
         .badge-original {
             position: absolute;
             top: 12px;
@@ -296,26 +288,14 @@ HTML_TEMPLATE = """
         .btn-whatsapp:hover { background-color: #1ebe57; color: white; transform: scale(1.02); box-shadow: 0 0 15px rgba(37, 211, 102, 0.4); }
         .btn-agotado { background-color: rgba(51, 51, 51, 0.8); color: #888; font-weight: 600; border: none; cursor: not-allowed; border-radius: 8px; }
 
-        .card-title {
-            color: #000000 !important;
-            font-weight: 700;
-            font-size: 0.95rem;
-            margin-bottom: 4px;
-        }
-
-        .descripcion-texto {
-            font-size: 0.75rem;
-            color: #000000 !important;
-            font-weight: 500;
-            line-height: 1.4;
-            margin-bottom: 10px;
-        }
+        .card-title { color: #000000 !important; font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; }
+        .descripcion-texto { font-size: 0.75rem; color: #000000 !important; font-weight: 500; line-height: 1.4; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
     <div class="header-bg shadow-sm mb-4">
-        <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Mi Logo" class="logo-header">
+        <img src="/static/logo.jpg" alt="Mi Logo" class="logo-header">
         <h1 class="fw-bold m-0" style="letter-spacing: 1px; color: white;">✨ Catálogo de Perfumes</h1>
         <p class="text-light opacity-75 mt-2 small" style="font-weight: 300; color: #FFD700 !important;">Detal, Mayor (6+ unds) y Gran Mayor (15+ unds)</p>
 
@@ -325,13 +305,11 @@ HTML_TEMPLATE = """
     </div>
 
     <div class="container pb-5">
-
-        <!-- PESTAÑAS DE NAVEGACIÓN -->
         <div class="tabs-nav">
-            <a href="{{ url_for('home') }}" class="tab-link {% if seccion == 'general' %}active{% endif %}">
+            <a href="/" class="tab-link {% if seccion == 'general' %}active{% endif %}">
                 <i class="fas fa-spray-can-sparkles"></i> General
             </a>
-            <a href="{{ url_for('originales') }}" class="tab-link {% if seccion == 'originales' %}active{% endif %}">
+            <a href="/originales" class="tab-link {% if seccion == 'originales' %}active{% endif %}">
                 <i class="fas fa-crown"></i> Originales
             </a>
         </div>
@@ -365,7 +343,6 @@ HTML_TEMPLATE = """
                     <div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="badge badge-brand text-uppercase">{{ item.marca }}</span>
-
                             {% if item.genero == 'Mujer' %}
                                 <span class="badge bg-danger-subtle text-danger" style="font-size:0.7rem;">Mujer</span>
                             {% elif item.genero == 'Hombre' %}
@@ -373,18 +350,14 @@ HTML_TEMPLATE = """
                             {% else %}
                                 <span class="badge bg-warning-subtle text-warning-emphasis" style="font-size:0.7rem;">Unisex</span>
                             {% endif %}
-
                         </div>
                         <div class="img-container">
                             <img src="{{ item.imagen }}" onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\\'text-muted small\\'>📷 Sin imagen</span>';" alt="{{ item.producto }}">
                         </div>
-
                         <h6 class="card-title fw-bold">{{ item.producto }}</h6>
-
                         {% if item.descripcion %}
                             <p class="descripcion-texto">{{ item.descripcion }}</p>
                         {% endif %}
-
                     </div>
 
                     <div class="price-box mt-auto">
@@ -410,7 +383,6 @@ HTML_TEMPLATE = """
                                ❌ Agotado
                             </button>
                         {% endif %}
-
                     </div>
                 </div>
             </div>
@@ -422,7 +394,6 @@ HTML_TEMPLATE = """
             <p>No hay productos disponibles en esta sección.</p>
         </div>
         {% endif %}
-
     </div>
 
     <script>
@@ -463,6 +434,4 @@ def originales():
         seccion='originales'
     )
 
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+# NOTA: Se eliminó el app.run() porque Vercel maneja el servidor automáticamente.
