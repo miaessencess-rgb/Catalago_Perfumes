@@ -190,7 +190,7 @@ HTML_TEMPLATE = """
     <div class="container pb-5">
         <div class="tabs-nav">
             <a href="/" class="tab-link {% if seccion == 'general' %}active{% endif %}">
-                <i class="fas fa-spray-can-sparkles"></i> General
+                <i class="fas fa-spray-can-sparkles"></i> Calidad 1.1
             </a>
             <a href="/originales" class="tab-link {% if seccion == 'originales' %}active{% endif %}">
                 <i class="fas fa-crown"></i> Originales
