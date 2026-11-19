@@ -8,7 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <!-- PapaParse para leer los CSV de Google Sheets -->
+    <!-- PapaParse para leer los CSV/TSV de Google Sheets -->
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
     <style>
@@ -83,14 +83,16 @@
         const URL_ORIGINALES = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRhnTHAAiW4abm51bRJu4HnrlLijwB0-gfgpRN5xKnMI1yJaHSGAcgkQM3js0P8TYLPHOusc9A1DQsP/pub?gid=1978451106&single=true&output=tsv";
 
         function limpiarPrecio(val) {
-            if (!val) return 0.0;
-            let limpio = String(val).replace('$', '').replace(' ', '').replace(',', '.');
-            return parseFloat(limpio) || 0.0;
+            if (val === undefined || val === null || val === '') return 0.0;
+            let limpio = String(val).replace('$', '').replace(' ', '').replace(',', '.').trim();
+            let num = parseFloat(limpio);
+            return isNaN(num) ? 0.0 : num; // Si no es un número, devuelve 0
         }
 
         function limpiarStock(val) {
-            if (!val) return 1;
-            return parseInt(String(val).replace(' ', '')) || 1;
+            if (val === undefined || val === null || val === '') return 1; // Solo si está vacío pone 1
+            let num = parseInt(String(val).replace(' ', '').trim());
+            return isNaN(num) ? 1 : num; // Respeta el 0. Si es texto raro, pone 1.
         }
 
         function generarSlug(nombre) {
@@ -110,11 +112,15 @@
             const url = tipo === 'general' ? URL_GENERAL : URL_ORIGINALES;
             const esOriginal = tipo === 'originales';
             const nombreCarpeta = esOriginal ? 'fotos_originales' : 'fotos';
+            
+            // Magia para que lea CSV (general) y TSV (originales)
+            const delimitador = url.includes('tsv') ? "\t" : ",";
 
             Papa.parse(url, {
                 download: true,
                 header: true,
                 skipEmptyLines: true,
+                delimiter: delimitador,
                 complete: function(results) {
                     let html = '';
                     results.data.forEach(row => {
@@ -156,7 +162,6 @@
                             `<a href="https://wa.me/584228490047?text=Hola,%20estoy%20interesado%20en%20el%20perfume:%20${encodeURIComponent(nombre)}%20-%20Marca:%20${encodeURIComponent(marca)}.%20Precio%20Detal:%20$${detal.toFixed(2)}" target="_blank" class="btn btn-whatsapp btn-sm w-100">💬 Pedir por WhatsApp</a>` :
                             `<button class="btn btn-agotado btn-sm w-100" disabled>❌ Agotado</button>`;
 
-                        // Lógica del onerror para buscar otras extensiones de imagen
                         let onerrorImg = `if (!this.dataset.tried) { this.dataset.tried='jpeg'; this.src = this.src.replace(/\\.jpg$/, '.jpeg'); } else if (this.dataset.tried=='jpeg') { this.dataset.tried='png'; this.src = this.src.replace(/\\.jpeg$/, '.png'); } else if (this.dataset.tried=='png') { this.dataset.tried='webp'; this.src = this.src.replace(/\\.png$/, '.webp'); } else { this.onerror=null; this.parentElement.innerHTML='<span class=\\'text-muted small\\'>📷 Sin imagen</span>'; }`;
 
                         html += `
@@ -215,4 +220,4 @@
         document.addEventListener('DOMContentLoaded', () => cargarDatos('general'));
     </script>
 </body>
-  </html>
+</html>
